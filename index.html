@@ -1136,8 +1136,9 @@ tr:hover td { background: var(--bg-hi); }
           <div class="rh">
             <span class="rl">Email generado</span>
             <div class="btn-row">
-              <button class="btn btn-sm" onclick="cp('r-f')">Copiar</button>
-              <button class="btn btn-sm btn-teal" onclick="abrirEmail()">Abrir en email</button>
+              <button class="btn btn-sm" onclick="cp('r-f')">Copiar texto</button>
+              <button class="btn btn-sm" onclick="abrirEmail()">Abrir en Mail</button>
+              <button class="btn btn-sm btn-teal" onclick="abrirGmail()">Abrir en Gmail</button>
             </div>
           </div>
           <div id="r-f"></div>
@@ -1448,7 +1449,23 @@ function showSp(id) { document.getElementById(id).classList.add('on'); }
 function hideSp(id) { document.getElementById(id).classList.remove('on'); }
 function showR(wid, rid, txt) { document.getElementById(rid).textContent = txt; document.getElementById(wid).classList.add('show'); }
 function hideR(wid) { document.getElementById(wid).classList.remove('show'); }
-function cp(id) { navigator.clipboard.writeText(document.getElementById(id).textContent); }
+function cp(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  // Si tiene HTML, extraer texto plano legible
+  var tmp = document.createElement('div');
+  tmp.innerHTML = el.innerHTML;
+  var text = (tmp.innerText || tmp.textContent || '').trim();
+  navigator.clipboard.writeText(text).catch(function() {
+    // Fallback para navegadores sin clipboard API
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+}
 
 function onFile(input) {
   var f = input.files[0]; if (!f) return;
@@ -1730,13 +1747,13 @@ function genMatesAB() {
 // FAMILIAS
 // =====================================================
 function genFam() {
-  var alu   = document.getElementById('f-alu').value.trim() || 'el/la alumno/a';
-  var mail  = document.getElementById('f-mail').value.trim();
-  var nota  = document.getElementById('f-nota').value.trim();
-  var asig  = document.getElementById('f-asig').value;
-  var obs   = document.getElementById('f-obs').value.trim();
-  var prof  = (PERFIL && PERFIL.nombre) ? PERFIL.nombre : 'El/La docente';
-  var centro= (PERFIL && PERFIL.centro) ? PERFIL.centro : 'el centro';
+  var alu   = (document.getElementById('f-alu') ? document.getElementById('f-alu').value.trim() : '') || 'el/la alumno/a';
+  var mail  = document.getElementById('f-mail') ? document.getElementById('f-mail').value.trim() : '';
+  var nota  = document.getElementById('f-nota') ? document.getElementById('f-nota').value.trim() : '';
+  var asig  = document.getElementById('f-asig') ? document.getElementById('f-asig').value : 'la asignatura';
+  var obs   = document.getElementById('f-obs') ? document.getElementById('f-obs').value.trim() : '';
+  var prof  = (typeof PERFIL !== 'undefined' && PERFIL.nombre) ? PERFIL.nombre : 'El/La docente';
+  var centro= (typeof PERFIL !== 'undefined' && PERFIL.centro) ? PERFIL.centro : 'el centro';
   var hoy   = new Date().toLocaleDateString('es-ES', {day:'2-digit', month:'long', year:'numeric'});
 
   var notaTxt = nota ? 'una nota media de <b>' + nota + '</b>' : 'las calificaciones de este período';
@@ -1745,53 +1762,52 @@ function genFam() {
   var plantillas = {
     citacion: {
       asunto: 'Solicitud de reunión — ' + alu + ' · ' + asig,
-      cuerpo: 'Me dirijo a ustedes para solicitar una reunión con el fin de tratar diversos aspectos relacionados con la evolución académica y personal de <b>' + alu + '</b> en la asignatura de ' + asig + '.' +
+      cuerpo: 'Me dirijo a ustedes para solicitar una reunión con el fin de tratar aspectos relacionados con la evolución académica de <b>' + alu + '</b> en la asignatura de ' + asig + '.' +
         (obs ? '<br><br>' + obs : '') +
-        '<br><br>Pueden contactar conmigo a través del centro para concretar el día y la hora que mejor les convenga. Quedo a su disposición para cualquier consulta previa.'
+        '<br><br>Pueden contactar conmigo a través del centro para concretar el día y la hora que mejor les convenga. Quedo a su disposición.'
     },
     boletin: {
       asunto: 'Comunicación de notas — ' + alu + ' · ' + asig,
-      cuerpo: 'Me pongo en contacto con ustedes para informarles sobre el rendimiento de <b>' + alu + '</b> en la asignatura de ' + asig + ' durante este período evaluativo.' +
-        '<br><br>Su hijo/a ha obtenido ' + notaTxt + (estadoTxt ? ', con lo que se encuentra <b>' + estadoTxt + '</b>' : '') + '.' +
+      cuerpo: 'Me pongo en contacto con ustedes para informarles sobre el rendimiento de <b>' + alu + '</b> en ' + asig + '.' +
+        '<br><br>Su hijo/a ha obtenido ' + notaTxt + (estadoTxt ? ', encontrándose <b>' + estadoTxt + '</b>' : '') + '.' +
         (obs ? '<br><br>' + obs : '') +
-        '<br><br>Estoy a su disposición si desean ampliar esta información o comentar el seguimiento del curso.'
+        '<br><br>Estoy a su disposición para ampliar esta información.'
     },
     felicita: {
       asunto: 'Felicitación por el rendimiento — ' + alu,
-      cuerpo: 'Me complace comunicarles que <b>' + alu + '</b> está demostrando un rendimiento excelente en la asignatura de ' + asig + (nota ? ', habiendo obtenido ' + notaTxt : '') + '.' +
-        '<br><br>Su esfuerzo, dedicación y actitud en clase son un ejemplo para el grupo. Les animo a transmitirle este reconocimiento, ya que contribuye enormemente a su motivación.' +
+      cuerpo: 'Me complace comunicarles que <b>' + alu + '</b> está demostrando un rendimiento excelente en ' + asig + (nota ? ', con ' + notaTxt : '') + '.' +
+        '<br><br>Su esfuerzo y actitud en clase son un ejemplo para el grupo. Les animo a transmitirle este reconocimiento.' +
         (obs ? '<br><br>' + obs : '')
     },
     alerta: {
       asunto: 'Alerta académica — ' + alu + ' · ' + asig,
-      cuerpo: 'Me dirijo a ustedes para comunicarles que <b>' + alu + '</b> está presentando dificultades en la asignatura de ' + asig + (nota ? ', con ' + notaTxt + ' en este período' : '') + '.' +
-        '<br><br>Consideramos importante que estén informados de esta situación para poder actuar de manera conjunta y ayudar a su hijo/a a superar estas dificultades.' +
+      cuerpo: 'Me dirijo a ustedes para comunicarles que <b>' + alu + '</b> está presentando dificultades en ' + asig + (nota ? ', con ' + notaTxt : '') + '.' +
+        '<br><br>Consideramos importante actuar de forma conjunta para ayudar a su hijo/a a superar esta situación.' +
         (obs ? '<br><br>' + obs : '') +
-        '<br><br>Les recomendamos que revisen diariamente el cuaderno y los deberes, y no duden en contactar con nosotros si necesitan orientación adicional.'
+        '<br><br>Les recomendamos revisar diariamente el cuaderno y los deberes. No duden en contactar con nosotros.'
     },
     conduct: {
       asunto: 'Comunicación sobre conducta — ' + alu,
       cuerpo: 'Me pongo en contacto con ustedes para informarles de una incidencia relacionada con el comportamiento de <b>' + alu + '</b> en el aula.' +
-        (obs ? '<br><br>' + obs : '<br><br>Su actitud está afectando al normal desarrollo de las clases y a su propio proceso de aprendizaje.') +
-        '<br><br>Les solicitamos su colaboración para tratar esta situación de forma conjunta. Pueden contactar con el centro para concretar una reunión.'
+        (obs ? '<br><br>' + obs : '<br><br>Su actitud está afectando al normal desarrollo de las clases.') +
+        '<br><br>Les solicitamos su colaboración para tratar esta situación de forma conjunta.'
     },
     recup: {
       asunto: 'Plan de recuperación — ' + alu + ' · ' + asig,
-      cuerpo: 'Me dirijo a ustedes para informarles sobre el plan de recuperación establecido para <b>' + alu + '</b> en la asignatura de ' + asig + '.' +
-        '<br><br>Para superar la materia, será necesario completar las siguientes actividades y cumplir los objetivos mínimos establecidos:' +
-        (obs ? '<br><br>' + obs : '<br><br>— Repasar los contenidos de las unidades no superadas.<br>— Completar los ejercicios de refuerzo indicados.<br>— Realizar la prueba de recuperación en la fecha establecida.') +
+      cuerpo: 'Me dirijo a ustedes para informarles sobre el plan de recuperación de <b>' + alu + '</b> en ' + asig + '.' +
+        (obs ? '<br><br>' + obs : '<br><br>Para superar la materia será necesario repasar los contenidos no superados y realizar la prueba de recuperación en la fecha establecida.') +
         '<br><br>Quedamos a su disposición para cualquier consulta.'
     }
   };
 
-  var tipo = famTipo || 'citacion';
+  var tipo = (typeof famTipo !== 'undefined' ? famTipo : null) || 'citacion';
   var p = plantillas[tipo] || plantillas['citacion'];
 
-  var html = '<div style="font-family:inherit;max-width:600px">' +
-    '<div style="font-size:.75rem;color:var(--text-muted);margin-bottom:4px">ASUNTO</div>' +
-    '<div style="font-weight:600;color:var(--text);margin-bottom:16px;padding:8px 12px;background:var(--bg-hi);border-radius:var(--rxs)">' + p.asunto + '</div>' +
-    '<div style="font-size:.75rem;color:var(--text-muted);margin-bottom:4px">CUERPO DEL EMAIL</div>' +
-    '<div style="background:var(--bg-hi);border-radius:var(--rsm);padding:16px;color:var(--text-soft);line-height:1.8;font-size:.92rem">' +
+  var html = '<div style="font-family:inherit;max-width:620px">' +
+    '<div style="font-size:.73rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Asunto</div>' +
+    '<div style="font-weight:600;color:var(--text);margin-bottom:16px;padding:10px 14px;background:var(--bg-hi);border-radius:var(--rsm);border-left:3px solid var(--primary)">' + p.asunto + '</div>' +
+    '<div style="font-size:.73rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px">Cuerpo del email</div>' +
+    '<div style="background:var(--bg-hi);border-radius:var(--rsm);padding:18px;color:var(--text-soft);line-height:1.9;font-size:.92rem;border-left:3px solid var(--teal)">' +
     'Estimada familia de <b>' + alu + '</b>:<br><br>' +
     p.cuerpo +
     '<br><br>Reciban un cordial saludo,<br><br>' +
@@ -1799,20 +1815,35 @@ function genFam() {
     '<span style="color:var(--text-muted);font-size:.85rem">' + asig + ' · ' + centro + '<br>' + hoy + '</span>' +
     '</div></div>';
 
-  document.getElementById('r-f').innerHTML = html;
+  var rfEl = document.getElementById('r-f');
+  rfEl.innerHTML = html;
+  rfEl.dataset.asunto = p.asunto;
+  rfEl.dataset.mail = mail;
+  rfEl.dataset.prof = prof;
+  rfEl.dataset.asig = asig;
+  rfEl.dataset.centro = centro;
+  rfEl.dataset.hoy = hoy;
   document.getElementById('rw-f').classList.add('show');
-
-  // Guardar para abrirEmail
-  document.getElementById('r-f').dataset.asunto = p.asunto;
-  document.getElementById('r-f').dataset.mail = mail;
 }
 
+function abrirGmail() {
+  var el = document.getElementById('r-f');
+  var mail = el.dataset.mail || document.getElementById('f-mail').value;
+  var asunto = el.dataset.asunto || 'Comunicación docente';
+  var tmp = document.createElement('div');
+  tmp.innerHTML = el.innerHTML;
+  var texto = tmp.innerText || tmp.textContent;
+  var url = 'https://mail.google.com/mail/?view=cm&fs=1' +
+    (mail ? '&to=' + encodeURIComponent(mail) : '') +
+    '&su=' + encodeURIComponent(asunto) +
+    '&body=' + encodeURIComponent(texto);
+  window.open(url, '_blank');
+}
 function abrirEmail() {
   var el = document.getElementById('r-f');
   var mail = el.dataset.mail || document.getElementById('f-mail').value;
   var asunto = el.dataset.asunto || 'Comunicación docente';
   if (!mail) { alert('Introduce el email de la familia primero.'); return; }
-  // Extraer texto plano del HTML
   var tmp = document.createElement('div');
   tmp.innerHTML = el.innerHTML;
   var texto = tmp.innerText || tmp.textContent;
