@@ -983,7 +983,7 @@ tr:hover td { background: var(--bg-hi); }
           <div class="spin-row" id="sp-r"><div class="spin"></div>Generando rúbrica...</div>
           <div class="rw" id="rw-r">
             <div class="rh"><span class="rl" id="rl-r">Rúbrica generada</span><div class="btn-row"><button class="btn btn-sm" onclick="cp('r-r')">Copiar</button><button class="btn btn-sm btn-teal" onclick="imprimir('r-r')">Imprimir</button></div></div>
-            <div class="rb" id="r-r"></div>
+            <div id="r-r"></div>
           </div>
         </div>
         <div id="rt-inf" style="display:none">
@@ -1633,63 +1633,186 @@ function imprimirTest() {
 // =====================================================
 // RÚBRICAS E INFORMES
 // =====================================================
-async function genRub() {
-  var tarea = document.getElementById('rb-t').value;
+function genRub() {
+  var tarea = document.getElementById('rb-t').value.trim();
   if (!tarea) { alert('Indica la tarea a evaluar.'); return; }
-  document.getElementById('rl-r').textContent = 'Rúbrica generada';
-  showSp('sp-r'); hideR('rw-r');
-  var t = await claude(
-    'Genera una rúbrica de evaluación para ' + document.getElementById('rb-a').value + ' de ' + document.getElementById('rb-c').value +
-    '. Tarea: ' + tarea + '. Criterios: ' + (document.getElementById('rb-cr').value || 'los adecuados para la tarea') +
-    '. Niveles: ' + document.getElementById('rb-n').value +
-    '. Formato: tabla con criterio | niveles de logro | descripción de cada nivel. Añade porcentaje de peso por criterio. Adaptada a la LOMLOE.'
-  );
-  hideSp('sp-r'); showR('rw-r', 'r-r', t);
+  var asig  = document.getElementById('rb-a').value;
+  var curso = document.getElementById('rb-c').value;
+  var crits = document.getElementById('rb-cr').value.trim();
+  var prof  = (PERFIL && PERFIL.nombre) ? PERFIL.nombre : 'Docente';
+  var hoy   = new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'});
+
+  // Criterios por defecto según asignatura
+  var defCrits = {
+    'Lengua Castellana': ['Contenido y comprensión','Expresión escrita','Ortografía y gramática','Estructura y cohesión'],
+    'Inglés': ['Comprensión del contenido','Expresión y fluidez','Corrección gramatical','Vocabulario y precisión'],
+    'Matemáticas': ['Comprensión del problema','Planteamiento y proceso','Cálculo y exactitud','Presentación y orden'],
+    'Física y Química': ['Conocimiento conceptual','Procedimiento experimental','Análisis de resultados','Expresión científica'],
+    'Biología y Geología': ['Conocimiento y comprensión','Uso de terminología','Relación de conceptos','Presentación'],
+    'Historia': ['Conocimiento histórico','Análisis y contextualización','Uso de fuentes','Expresión y argumentación'],
+  };
+  var criterios = crits ? crits.split(/[,\n]+/).map(function(c){return c.trim()}).filter(Boolean) : (defCrits[asig] || ['Contenido','Proceso','Resultado','Presentación']);
+
+  var niveles = ['Excelente (4)', 'Notable (3)', 'Suficiente (2)', 'Insuficiente (1)'];
+  var descs = [
+    ['Demuestra dominio completo y profundo', 'Muestra comprensión sólida con mínimos errores', 'Alcanza los mínimos con algunos errores', 'No alcanza los mínimos establecidos'],
+    ['Aplica correctamente todos los procedimientos', 'Aplica correctamente la mayoría', 'Aplica con dificultades los procedimientos', 'No aplica los procedimientos correctamente'],
+    ['Resultado correcto y bien justificado', 'Resultado correcto con pequeños errores', 'Resultado parcialmente correcto', 'Resultado incorrecto o ausente'],
+    ['Presentación cuidada, clara y ordenada', 'Presentación correcta con pequeños detalles', 'Presentación básica pero aceptable', 'Presentación descuidada o incompleta'],
+  ];
+
+  var peso = Math.round(100 / criterios.length);
+  var pesos = criterios.map(function(_,i){ return i === criterios.length-1 ? 100 - peso*(criterios.length-1) : peso; });
+
+  var tabla = '<table style="width:100%;border-collapse:collapse;font-size:.82rem;margin-top:12px">' +
+    '<thead><tr>' +
+    '<th style="background:var(--primary);color:#fff;padding:8px 10px;text-align:left;width:20%">Criterio (peso)</th>' +
+    niveles.map(function(n){ return '<th style="background:var(--primary);color:#fff;padding:8px 10px;text-align:center">' + n + '</th>'; }).join('') +
+    '</tr></thead><tbody>';
+
+  criterios.forEach(function(crit, ci) {
+    var rowBg = ci % 2 === 0 ? 'var(--bg-card)' : 'var(--bg-deep)';
+    tabla += '<tr style="background:' + rowBg + '">' +
+      '<td style="padding:8px 10px;font-weight:600;color:var(--text);border:1px solid var(--border)">' + crit + '<br><span style="font-size:.72rem;color:var(--teal-hi)">' + pesos[ci] + '%</span></td>' +
+      descs[ci % descs.length].map(function(d){
+        return '<td style="padding:8px 10px;color:var(--text-soft);border:1px solid var(--border);text-align:center">' + d + '</td>';
+      }).join('') +
+      '</tr>';
+  });
+  tabla += '</tbody></table>';
+
+  var html = '<div>' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">' +
+    '<div><div style="font-weight:700;color:var(--text);font-size:1rem">Rúbrica LOMLOE — ' + tarea + '</div>' +
+    '<div style="font-size:.78rem;color:var(--text-muted)">' + asig + ' · ' + curso + ' · ' + prof + ' · ' + hoy + '</div></div>' +
+    '<span style="padding:3px 10px;border-radius:20px;font-size:.72rem;background:var(--teal-soft);border:1px solid var(--teal);color:var(--teal-hi);font-weight:600">LOMLOE</span>' +
+    '</div>' + tabla +
+    '<div style="margin-top:10px;font-size:.75rem;color:var(--text-muted)">Escala: Excelente=9-10 · Notable=7-8 · Suficiente=5-6 · Insuficiente=0-4</div>' +
+    '</div>';
+
+  document.getElementById('r-r').innerHTML = html;
+  document.getElementById('rw-r').classList.add('show');
 }
 
-async function genInf() {
-  var alu = document.getElementById('in-alu').value;
+function genInf() {
+  var alu  = document.getElementById('in-alu').value.trim();
   if (!alu) { alert('Introduce el nombre del alumno.'); return; }
-  document.getElementById('rl-r').textContent = 'Informe generado';
-  showSp('sp-r'); hideR('rw-r');
-  var t = await claude(
-    'Genera un informe de evaluación para el boletín de la ' + document.getElementById('in-ev').value + ' de ' + alu +
-    ' en ' + document.getElementById('in-asig').value + '. Nota: ' + (document.getElementById('in-n').value || 'no indicada') + '/10. ' +
-    (document.getElementById('in-obs').value ? 'Observaciones del docente: ' + document.getElementById('in-obs').value + '. ' : '') +
-    'Escribe un párrafo de 3-4 líneas: rendimiento académico, actitud y participación, áreas de mejora o logros. Tono formal para familia española. Sin saludos.'
-  );
-  hideSp('sp-r'); showR('rw-r', 'r-r', t);
+  var nota = parseFloat(document.getElementById('in-n').value) || null;
+  var asig = document.getElementById('in-a').value;
+  var curso= document.getElementById('in-c').value;
+  var obs  = document.getElementById('in-obs').value.trim();
+  var prof = (PERFIL && PERFIL.nombre) ? PERFIL.nombre : 'El/La docente';
+
+  var estadoTxt = nota ? (nota >= 9 ? 'sobresaliente' : nota >= 7 ? 'notable' : nota >= 6 ? 'bien' : nota >= 5 ? 'suficiente' : 'insuficiente') : null;
+  var tendencia = nota ? (nota >= 7 ? 'positiva' : nota >= 5 ? 'en proceso de consolidación' : 'que requiere refuerzo') : 'pendiente de evaluar';
+
+  var frases = {
+    sobresaliente: ['demuestra un dominio excelente de los contenidos', 'muestra una actitud ejemplar y participación activa en clase', 'supera con creces los objetivos establecidos'],
+    notable:       ['presenta un buen nivel de asimilación de los contenidos', 'muestra una actitud positiva y buena participación', 'alcanza satisfactoriamente los objetivos del curso'],
+    bien:          ['alcanza los objetivos de la asignatura con solidez', 'muestra interés y participación adecuada', 'tiene margen para mejorar en algunos aspectos concretos'],
+    suficiente:    ['alcanza los objetivos mínimos de la asignatura', 'debe consolidar algunos contenidos trabajados', 'se recomienda mayor constancia en el estudio y la práctica'],
+    insuficiente:  ['presenta dificultades para alcanzar los objetivos mínimos', 'necesita reforzar los contenidos fundamentales', 'se recomienda un plan de refuerzo específico para superar la materia'],
+  };
+
+  var f = frases[estadoTxt] || frases['suficiente'];
+  var texto = alu + ' ' + f[0] + ' en ' + asig + (nota ? ', con una calificación de <b>' + nota + '/10</b>' : '') + '. ' +
+    (obs ? obs + ' ' : f[1] + '. ') +
+    f[2] + '.';
+
+  var html = '<div style="background:var(--bg-hi);border-radius:var(--rsm);padding:16px;border-left:3px solid var(--primary)">' +
+    '<div style="font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--primary-hi);margin-bottom:8px">INFORME PARA EL BOLETÍN</div>' +
+    '<div style="font-size:.82rem;color:var(--text-muted);margin-bottom:10px">' + alu + ' · ' + asig + ' · ' + curso + (nota ? ' · Nota: <b style="color:var(--text)">' + nota + '</b>' : '') + '</div>' +
+    '<p style="color:var(--text-soft);line-height:1.8;font-size:.92rem">' + texto + '</p>' +
+    '<div style="margin-top:10px;font-size:.78rem;color:var(--text-muted)">Tendencia: <span style="color:var(--teal-hi);font-weight:600">' + tendencia + '</span></div>' +
+    '</div>';
+
+  document.getElementById('r-r').innerHTML = html;
+  document.getElementById('rw-r').classList.add('show');
 }
 
-async function genACI() {
-  var alu = document.getElementById('ac-alu').value;
+function genACI() {
+  var alu  = document.getElementById('ac-alu').value.trim();
   if (!alu) { alert('Introduce el nombre del alumno.'); return; }
-  document.getElementById('rl-r').textContent = 'Adaptación curricular generada';
-  showSp('sp-r'); hideR('rw-r');
-  var t = await claude(
-    'Genera una Adaptación Curricular Individual (ACI) para ' + alu + ', alumno de ' +
-    document.getElementById('ac-c').value + ' con ' + document.getElementById('ac-nee').value +
-    ' en ' + document.getElementById('ac-asig').value + '.' +
-    (document.getElementById('ac-desc').value ? ' Dificultades observadas: ' + document.getElementById('ac-desc').value + '.' : '') +
-    '\n\nIncluye:\n1. Datos y contexto del alumno\n2. Áreas de adaptación: objetivos, contenidos, metodología y criterios de evaluación\n3. Medidas de acceso al currículo\n4. Recursos y apoyos necesarios\n5. Sistema de seguimiento y revisión\nAdaptada a la LOMLOE.'
-  );
-  hideSp('sp-r'); showR('rw-r', 'r-r', t);
+  var asig = document.getElementById('ac-a').value;
+  var nec  = document.getElementById('ac-nec').value.trim() || 'dificultades de aprendizaje específicas';
+  var prof = (PERFIL && PERFIL.nombre) ? PERFIL.nombre : 'Docente';
+  var centro = (PERFIL && PERFIL.centro) ? PERFIL.centro : 'el centro';
+  var hoy  = new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'});
+
+  var secciones = [
+    {
+      titulo: '1. Datos del alumno y contexto',
+      contenido: '<b>Alumno/a:</b> ' + alu + '<br><b>Asignatura:</b> ' + asig + '<br><b>Centro:</b> ' + centro + '<br><b>Docente:</b> ' + prof + '<br><b>Fecha:</b> ' + hoy + '<br><b>Necesidades identificadas:</b> ' + nec
+    },
+    {
+      titulo: '2. Adaptación de objetivos',
+      contenido: 'Se priorizan los objetivos mínimos e imprescindibles de la asignatura. Se eliminarán o reducirán aquellos contenidos que supongan una barrera insalvable, manteniendo siempre el desarrollo de las competencias clave establecidas por la LOMLOE.'
+    },
+    {
+      titulo: '3. Adaptación metodológica',
+      contenido: '— Uso de materiales adaptados y simplificados.<br>— Instrucciones claras, breves y secuenciadas.<br>— Mayor tiempo para la realización de tareas.<br>— Apoyo visual y uso de organizadores gráficos.<br>— Agrupamientos flexibles y trabajo cooperativo cuando sea posible.'
+    },
+    {
+      titulo: '4. Adaptación de la evaluación',
+      contenido: '— Pruebas adaptadas en formato, extensión y presentación.<br>— Valoración del proceso y el esfuerzo, no solo el resultado.<br>— Posibilidad de evaluación oral como alternativa o complemento.<br>— Criterios de evaluación ajustados al nivel de competencia del alumno/a.'
+    },
+    {
+      titulo: '5. Recursos y apoyos',
+      contenido: '— Coordinación con el orientador/a del centro.<br>— Comunicación periódica con la familia.<br>— Posibilidad de apoyo en horario de refuerzo.<br>— Materiales específicos facilitados por el docente.'
+    },
+    {
+      titulo: '6. Seguimiento y revisión',
+      contenido: 'Se realizará una revisión trimestral de la presente ACI en coordinación con el equipo docente y la familia. Los criterios y medidas se ajustarán en función de la evolución del alumno/a.'
+    },
+  ];
+
+  var html = '<div>' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:6px">' +
+    '<div><div style="font-weight:700;color:var(--text);font-size:1rem">Adaptación Curricular Individual (ACI)</div>' +
+    '<div style="font-size:.78rem;color:var(--text-muted)">' + alu + ' · ' + asig + ' · ' + hoy + '</div></div>' +
+    '<span style="padding:3px 10px;border-radius:20px;font-size:.72rem;background:var(--primary-soft);border:1px solid var(--primary);color:var(--primary-hi);font-weight:600">LOMLOE</span>' +
+    '</div>';
+
+  secciones.forEach(function(s) {
+    html += '<div style="margin-bottom:12px;background:var(--bg-hi);border-radius:var(--rsm);overflow:hidden">' +
+      '<div style="background:var(--primary-soft);border-left:3px solid var(--primary);padding:8px 12px;font-weight:700;font-size:.85rem;color:var(--primary-hi)">' + s.titulo + '</div>' +
+      '<div style="padding:10px 14px;font-size:.85rem;color:var(--text-soft);line-height:1.7">' + s.contenido + '</div>' +
+      '</div>';
+  });
+
+  html += '<div style="font-size:.75rem;color:var(--text-muted);margin-top:8px;text-align:right">Documento generado con DocencIA · WhiteMoon Agencia IA</div></div>';
+
+  document.getElementById('r-r').innerHTML = html;
+  document.getElementById('rw-r').classList.add('show');
 }
 
-async function genInfGrupo() {
+function genInfGrupo() {
   var list = D[cA] || [];
   if (!list.length) { alert('No hay alumnos en esta clase.'); return; }
-  var resumen = list.map(function(al) { return al.n + ' ' + al.a + ': media ' + (med(al) || 'sin notas'); }).join(', ');
   sw('rubricas', 3);
-  document.getElementById('rl-r').textContent = 'Informes del grupo generados';
-  showSp('sp-r'); hideR('rw-r');
-  var t = await claude(
-    'Genera informes de evaluación para el boletín de los siguientes alumnos.\n' +
-    'Formato por alumno: NOMBRE APELLIDO: texto del informe.\n' +
-    'Alumnos y medias: ' + resumen +
-    '\n\nCada informe: 3-4 líneas con rendimiento, actitud y participación, y recomendaciones. Tono formal para familia española. Sin saludos.'
-  );
-  hideSp('sp-r'); showR('rw-r', 'r-r', t);
+  document.querySelectorAll('#p-rubricas .t2')[1].click();
+
+  var html = '<div>';
+  list.forEach(function(al) {
+    var m = med(al);
+    var estadoTxt = m ? (m >= 9 ? 'sobresaliente' : m >= 7 ? 'notable' : m >= 6 ? 'bien' : m >= 5 ? 'suficiente' : 'insuficiente') : null;
+    var frases = {
+      sobresaliente: 'demuestra un rendimiento excelente, con dominio sólido de los contenidos y actitud ejemplar en clase.',
+      notable:       'presenta un buen nivel de asimilación de los contenidos y participación activa.',
+      bien:          'alcanza los objetivos con solidez y muestra una actitud positiva hacia el aprendizaje.',
+      suficiente:    'alcanza los objetivos mínimos. Se recomienda mayor constancia para consolidar los contenidos.',
+      insuficiente:  'presenta dificultades para alcanzar los objetivos mínimos. Se recomienda un plan de refuerzo específico.',
+    };
+    var texto = (al.n + ' ' + al.a) + ' ' + (estadoTxt ? frases[estadoTxt] : 'Pendiente de evaluar.');
+    html += '<div style="margin-bottom:10px;background:var(--bg-hi);border-radius:var(--rsm);padding:12px 14px;border-left:3px solid ' + (m >= 5 ? 'var(--success)' : m ? 'var(--danger)' : 'var(--border)') + '">' +
+      '<div style="font-weight:600;color:var(--text);margin-bottom:4px">' + al.n + ' ' + al.a + (m ? ' <span style="font-size:.78rem;color:var(--text-muted)">· ' + m + '/10</span>' : '') + '</div>' +
+      '<div style="font-size:.85rem;color:var(--text-soft);line-height:1.6">' + texto + '</div>' +
+      '</div>';
+  });
+  html += '</div>';
+
+  document.getElementById('r-r').innerHTML = html;
+  document.getElementById('rw-r').classList.add('show');
 }
 
 // =====================================================
