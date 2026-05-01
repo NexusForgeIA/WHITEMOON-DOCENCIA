@@ -754,7 +754,19 @@ tr:hover td { background: var(--bg-hi); }
   .rb { color: black; background: #f9f9f9; border: 1px solid #ddd; max-height: none; }
 }
 
-/* ── Estilos ejercicios matemáticas algorítmicas ── */
+/* ── Nivel buttons matemáticas ── */
+.niv-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.niv-btn{background:var(--bg-deep);border:1.5px solid var(--border);border-radius:var(--rsm);padding:12px 10px;cursor:pointer;transition:all .18s;text-align:center;font-family:inherit;outline:none}
+.niv-btn:hover{border-color:var(--primary)}
+.niv-btn.on{border-color:var(--primary);background:var(--primary-soft)}
+.niv-dots{display:flex;justify-content:center;gap:4px;margin-bottom:5px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border)}
+.niv-btn.on .dot.fill{background:var(--primary-hi)}
+.niv-btn:not(.on) .dot.fill{background:var(--text-muted)}
+.niv-name{font-size:.82rem;font-weight:600;color:var(--text-soft)}
+.niv-btn.on .niv-name{color:var(--primary-hi)}
+.niv-sub{font-size:.68rem;color:var(--text-muted);margin-top:2px}
+@media(max-width:480px){.niv-row{grid-template-columns:1fr}}
 .ej{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rsm);padding:14px 16px;margin-bottom:10px;position:relative;transition:border-color .15s}
 .ej:hover{border-color:var(--border-hi)}
 .ej-num{position:absolute;top:12px;right:12px;font-size:.68rem;font-weight:600;color:var(--text-muted);background:var(--bg-deep);border:1px solid var(--border);border-radius:var(--rxs);padding:2px 7px}
