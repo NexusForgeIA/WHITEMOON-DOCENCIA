@@ -2,10 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-<meta name="description" content="DocencIA — Suite de IA para docentes españoles">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0F0A21">
-<title>DocencIA — Suite IA para Docentes</title>
+<title>DocencIA — Suite Educativa</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -781,42 +780,30 @@ tr:hover td { background: var(--bg-hi); }
 <body>
 
 <div class="app">
-  <!-- SIDEBAR -->
-  <nav class="sidebar">
-    <div class="sb-logo">DocencIA</div>
 
-    <button class="sb-btn active" id="btn-clases" onclick="sw('clases',0)" title="Clases y alumnos">
+  <nav class="sidebar">
+    <div class="sb-logo"><span>D</span></div>
+    <button class="sb-btn active" id="btn-clases" onclick="sw('clases',0)" title="Gestión de clases">
       <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     </button>
-
     <button class="sb-btn" id="btn-corrector" onclick="sw('corrector',1)" title="Registro de notas">
       <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
     </button>
-
     <button class="sb-btn" id="btn-tests" onclick="sw('tests',2)" title="Generador de tests">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
     </button>
-
     <button class="sb-btn" id="btn-rubricas" onclick="sw('rubricas',3)" title="Rúbricas e informes">
       <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
     </button>
-
     <div class="sb-divider"></div>
-
     <button class="sb-btn" id="btn-mates" onclick="sw('mates',4)" title="Matemáticas adaptativas">
       <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     </button>
-
     <button class="sb-btn" id="btn-familias" onclick="sw('familias',5)" title="Comunicación familias">
       <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
     </button>
-    <div class="sb-divider"></div>
-    <button class="sb-btn" id="btn-examenes" onclick="sw('examenes',6)" title="Exámenes y autocorrección">
-      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-    </button>
   </nav>
 
-  <!-- CONTENT -->
   <div class="content">
     <header class="topbar">
       <div>
@@ -824,8 +811,9 @@ tr:hover td { background: var(--bg-hi); }
         <div class="tb-page" id="tb-page">Gestión de clases</div>
       </div>
       <div class="tb-user">
-        <div class="tb-name"><strong>Prof. García</strong>IES Miguel de Cervantes</div>
-        <div class="avatar">MG</div>
+        <div class="tb-name" id="tb-name">Prof. García</div>
+        <div class="tb-school" id="tb-school">IES WhiteMoon</div>
+        <div class="tb-av" id="tb-av">MG</div>
       </div>
     </header>
 
@@ -833,55 +821,55 @@ tr:hover td { background: var(--bg-hi); }
 
       <!-- CLASES -->
       <div class="panel active" id="p-clases">
+        <div class="pt">Gestión de <span>clases</span></div>
+        <div class="pd">Alumnos, notas por evaluación y estado académico en tiempo real</div>
         <div class="stats">
-          <div class="stat"><div class="stat-n" id="s-total">24</div><div class="stat-l">Alumnos · 1ºA</div></div>
+          <div class="stat"><div class="stat-n" id="s-total">0</div><div class="stat-l" id="sl-total">Alumnos · 1ºA</div></div>
           <div class="stat"><div class="stat-n" id="s-media">—</div><div class="stat-l">Media de clase</div></div>
           <div class="stat"><div class="stat-n" id="s-apr">—</div><div class="stat-l">Aprobados</div></div>
           <div class="stat"><div class="stat-n">4</div><div class="stat-l">Clases activas</div></div>
         </div>
-
-        <div class="clase-bar">
-          <div class="tag-wrap" id="clase-tabs" style="margin:0">
-            <button class="tag on" onclick="selC(this,'1A')">1º A</button>
-            <button class="tag" onclick="selC(this,'1B')">1º B</button>
-            <button class="tag" onclick="selC(this,'2A')">2º A</button>
-            <button class="tag" onclick="selC(this,'3A')">3º A</button>
-          </div>
+        <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">
+          <button class="cls-tab" id="ct-1A" onclick="swCls('1A',this)" style="padding:6px 16px;border:1.5px solid var(--primary);border-radius:20px;background:var(--primary-soft);color:var(--primary-hi);font-size:.82rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s">1º A</button>
+          <button class="cls-tab" id="ct-1B" onclick="swCls('1B',this)" style="padding:6px 16px;border:1.5px solid var(--border);border-radius:20px;background:transparent;color:var(--text-muted);font-size:.82rem;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s">1º B</button>
+          <button class="cls-tab" id="ct-2A" onclick="swCls('2A',this)" style="padding:6px 16px;border:1.5px solid var(--border);border-radius:20px;background:transparent;color:var(--text-muted);font-size:.82rem;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s">2º A</button>
+          <button class="cls-tab" id="ct-3A" onclick="swCls('3A',this)" style="padding:6px 16px;border:1.5px solid var(--border);border-radius:20px;background:transparent;color:var(--text-muted);font-size:.82rem;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s">3º A</button>
+        </div>
+        <div class="tbar">
+          <div></div>
           <div class="btn-row">
             <button class="btn btn-sm" onclick="abrirModalAlumno()">+ Alumno</button>
             <button class="btn btn-sm btn-primary" onclick="genInfGrupo()">Generar informes</button>
           </div>
         </div>
-
         <div class="tw">
           <table>
-            <thead><tr>
-              <th style="width:32%">Alumno</th>
-              <th style="width:10%">1ª Ev</th>
-              <th style="width:10%">2ª Ev</th>
-              <th style="width:10%">3ª Ev</th>
-              <th style="width:10%">Media</th>
-              <th style="width:12%">Estado</th>
-              <th style="width:16%">Acciones</th>
-            </tr></thead>
+            <thead>
+              <tr>
+                <th>Alumno</th>
+                <th>1ª EV</th>
+                <th>2ª EV</th>
+                <th>3ª EV</th>
+                <th>Media</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
             <tbody id="tb-body"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- CORRECTOR -->
+      <!-- REGISTRO DE NOTAS -->
       <div class="panel" id="p-corrector">
         <div class="pt">Registro de <span>notas</span></div>
         <div class="pd">Añade notas de cualquier tipo de prueba — exámenes, trabajos, oral, actitud — y calcula la media ponderada al instante</div>
-
         <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:flex-end">
           <div class="fg" style="flex:2;min-width:140px;margin:0"><label>Nombre de la prueba</label><input id="reg-nombre" placeholder="Examen Tema 4, Trabajo oral..."></div>
           <div class="fg" style="flex:1;min-width:80px;margin:0"><label>Peso (%)</label><input type="number" id="reg-peso" value="20" min="1" max="100"></div>
           <button class="btn btn-primary" onclick="regAddPrueba()" style="flex-shrink:0">+ Añadir prueba</button>
         </div>
-
         <div id="reg-pruebas"></div>
-
         <div id="reg-tabla-wrap" style="display:none">
           <div style="display:flex;align-items:center;justify-content:space-between;margin:16px 0 10px;flex-wrap:wrap;gap:8px">
             <div style="font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--primary-hi)">Tabla de notas</div>
@@ -903,43 +891,28 @@ tr:hover td { background: var(--bg-hi); }
       <div class="panel" id="p-tests">
         <div class="pt">Generador de <span>tests</span></div>
         <div class="pd">Crea evaluaciones completas adaptadas al nivel y al currículo LOMLOE</div>
-
         <div class="card">
           <div class="card-label">Configuración</div>
           <div class="g2">
-            <div class="fg"><label>Asignatura</label><select id="t-asig"><option>Lengua Castellana</option>
-                <option>Lengua y Literatura</option>
-                <option>Inglés</option>
-                <option>Francés</option>
-                <option>Alemán</option>
-                <option>Matemáticas</option>
-                <option>Matemáticas Aplicadas</option>
-                <option>Física y Química</option>
-                <option>Física</option>
-                <option>Química</option>
-                <option>Biología y Geología</option>
-                <option>Biología</option>
-                <option>Historia de España</option>
-                <option>Historia del Mundo Contemporáneo</option>
-                <option>Geografía e Historia</option>
-                <option>Filosofía</option>
-                <option>Economía</option>
-                <option>Tecnología</option>
-                <option>Informática</option>
-                <option>Educación Plástica y Visual</option>
-                <option>Música</option>
-                <option>Educación Física</option>
-                <option>Religión</option>
-                <option>Valores Éticos</option>
-                <option>Latín</option>
-                <option>Griego</option></select></div>
+            <div class="fg"><label>Asignatura</label><select id="t-asig">
+              <option>Lengua Castellana</option><option>Lengua y Literatura</option>
+              <option>Inglés</option><option>Francés</option><option>Alemán</option>
+              <option>Matemáticas</option><option>Matemáticas Aplicadas</option>
+              <option>Física y Química</option><option>Física</option><option>Química</option>
+              <option>Biología y Geología</option><option>Biología</option>
+              <option>Historia de España</option><option>Historia del Mundo Contemporáneo</option>
+              <option>Geografía e Historia</option><option>Filosofía</option>
+              <option>Economía</option><option>Tecnología</option><option>Informática</option>
+              <option>Educación Física</option><option>Religión</option><option>Valores Éticos</option>
+              <option>Latín</option><option>Griego</option>
+            </select></div>
             <div class="fg"><label>Curso</label>
               <select id="t-curso">
+                <option>3º Primaria</option><option>4º Primaria</option><option>5º Primaria</option><option>6º Primaria</option>
                 <option>1º ESO</option><option>2º ESO</option><option selected>3º ESO</option><option>4º ESO</option>
                 <option>1º Bachillerato</option><option>2º Bachillerato</option>
-                <option>5º Primaria</option><option>6º Primaria</option>
               </select></div>
-            <div class="fg"><label>Número de preguntas</label><input id="t-num" type="number" min="3" max="20" value="10"></div>
+            <div class="fg"><label>Número de preguntas</label><input id="t-num" type="number" min="3" max="30" value="10"></div>
             <div class="fg"><label>Dificultad</label>
               <select id="t-dif"><option>Fácil</option><option selected>Medio</option><option>Difícil</option><option>Mixto</option></select></div>
           </div>
@@ -953,12 +926,11 @@ tr:hover td { background: var(--bg-hi); }
             <button class="tag" onclick="tog(this)">Relacionar columnas</button>
           </div>
           <div style="font-size:.76rem;color:var(--teal-hi);background:var(--teal-soft);border:1px solid var(--teal);border-radius:var(--rsm);padding:8px 12px;margin-bottom:12px">
-            Sin API — banco de +500 preguntas para Lengua, Inglés, Historia, Biología, Física y Geografía. Matemáticas usa generador algorítmico.
+            Sin API — banco de +500 preguntas para Lengua, Inglés, Francés, Alemán, Historia, Biología, Física y Geografía. Matemáticas usa generador algorítmico.
           </div>
           <button class="btn btn-primary" onclick="genTest()">Generar test completo</button>
           <button class="btn btn-teal" style="margin-left:8px" onclick="genTestAB()">Variante A / B</button>
         </div>
-
         <div class="spin-row" id="sp-t"><div class="spin"></div>Generando preguntas...</div>
         <div class="rw" id="rw-t">
           <div class="rh">
@@ -976,143 +948,70 @@ tr:hover td { background: var(--bg-hi); }
       <div class="panel" id="p-rubricas">
         <div class="pt">Rúbricas e <span>informes</span></div>
         <div class="pd">Rúbricas LOMLOE, informes para el boletín y adaptaciones curriculares ACI</div>
-
         <div class="tabs2">
           <button class="t2 on" onclick="swRub('rt-rub',this)">Rúbrica</button>
           <button class="t2" onclick="swRub('rt-inf',this)">Informe alumno</button>
           <button class="t2" onclick="swRub('rt-aci',this)">Adaptación ACI</button>
         </div>
-
         <div id="rt-rub">
           <div class="g2">
-            <div class="fg"><label>Asignatura</label><select id="rb-a"><option>Lengua Castellana</option>
-                <option>Lengua y Literatura</option>
-                <option>Inglés</option>
-                <option>Francés</option>
-                <option>Alemán</option>
-                <option>Matemáticas</option>
-                <option>Matemáticas Aplicadas</option>
-                <option>Física y Química</option>
-                <option>Física</option>
-                <option>Química</option>
-                <option>Biología y Geología</option>
-                <option>Biología</option>
-                <option>Historia de España</option>
-                <option>Historia del Mundo Contemporáneo</option>
-                <option>Geografía e Historia</option>
-                <option>Filosofía</option>
-                <option>Economía</option>
-                <option>Tecnología</option>
-                <option>Informática</option>
-                <option>Educación Plástica y Visual</option>
-                <option>Música</option>
-                <option>Educación Física</option>
-                <option>Religión</option>
-                <option>Valores Éticos</option>
-                <option>Latín</option>
-                <option>Griego</option></select></div>
-            <div class="fg"><label>Tarea a evaluar</label><input id="rb-t" placeholder="Redacción, exposición oral, proyecto..."></div>
-            <div class="fg"><label>Niveles de logro</label>
-              <select id="rb-n">
-                <option>4 niveles (Excelente / Bien / Regular / Insuficiente)</option>
-                <option>3 niveles (Logrado / En proceso / No logrado)</option>
-                <option>Numérico 0-10</option>
-              </select></div>
-            <div class="fg"><label>Curso</label>
-              <select id="rb-c"><option>1º ESO</option><option>2º ESO</option><option selected>3º ESO</option><option>4º ESO</option><option>1º Bachillerato</option></select></div>
+            <div class="fg"><label>Asignatura</label><select id="rb-a">
+              <option>Lengua Castellana</option><option>Inglés</option><option>Matemáticas</option>
+              <option>Física y Química</option><option>Biología y Geología</option>
+              <option>Historia</option><option>Geografía</option><option>Filosofía</option>
+            </select></div>
+            <div class="fg"><label>Curso</label><select id="rb-c">
+              <option>1º ESO</option><option>2º ESO</option><option selected>3º ESO</option><option>4º ESO</option>
+              <option>1º Bachillerato</option><option>2º Bachillerato</option>
+            </select></div>
+            <div class="fg"><label>Tarea a evaluar</label><input id="rb-t" placeholder="Redacción argumentativa, problema de álgebra..."></div>
+            <div class="fg"><label>Criterios clave</label><input id="rb-cr" placeholder="Coherencia, vocabulario, estructura..."></div>
           </div>
-          <div class="fg"><label>Criterios a evaluar</label>
-            <textarea id="rb-cr" rows="2" placeholder="Ej: contenido, estructura, vocabulario, ortografía, presentación..."></textarea></div>
-          <button class="btn btn-primary" onclick="genRub()">Generar rúbrica</button>
+          <button class="btn btn-primary" onclick="genRub()">Generar rúbrica LOMLOE</button>
+          <div class="spin-row" id="sp-r"><div class="spin"></div>Generando rúbrica...</div>
+          <div class="rw" id="rw-r">
+            <div class="rh"><span class="rl" id="rl-r">Rúbrica generada</span><div class="btn-row"><button class="btn btn-sm" onclick="cp('r-r')">Copiar</button><button class="btn btn-sm btn-teal" onclick="imprimir('r-r')">Imprimir</button></div></div>
+            <div class="rb" id="r-r"></div>
+          </div>
         </div>
-
         <div id="rt-inf" style="display:none">
           <div class="g2">
-            <div class="fg"><label>Nombre del alumno</label><input id="in-alu" placeholder="María García López"></div>
-            <div class="fg"><label>Asignatura</label><select id="in-asig"><option>Lengua Castellana</option>
-                <option>Lengua y Literatura</option>
-                <option>Inglés</option>
-                <option>Francés</option>
-                <option>Alemán</option>
-                <option>Matemáticas</option>
-                <option>Matemáticas Aplicadas</option>
-                <option>Física y Química</option>
-                <option>Física</option>
-                <option>Química</option>
-                <option>Biología y Geología</option>
-                <option>Biología</option>
-                <option>Historia de España</option>
-                <option>Historia del Mundo Contemporáneo</option>
-                <option>Geografía e Historia</option>
-                <option>Filosofía</option>
-                <option>Economía</option>
-                <option>Tecnología</option>
-                <option>Informática</option>
-                <option>Educación Plástica y Visual</option>
-                <option>Música</option>
-                <option>Educación Física</option>
-                <option>Religión</option>
-                <option>Valores Éticos</option>
-                <option>Latín</option>
-                <option>Griego</option></select></div>
-            <div class="fg"><label>Nota media</label><input id="in-n" type="number" min="1" max="10" step="0.5" placeholder="7.5"></div>
-            <div class="fg"><label>Evaluación</label>
-              <select id="in-ev"><option>1ª Evaluación</option><option selected>2ª Evaluación</option><option>3ª Evaluación</option><option>Final</option></select></div>
+            <div class="fg"><label>Alumno</label><input id="in-alu" placeholder="Nombre del alumno"></div>
+            <div class="fg"><label>Nota media</label><input id="in-n" type="number" min="1" max="10" step="0.5" placeholder="6.5"></div>
+            <div class="fg"><label>Asignatura</label><select id="in-a">
+              <option>Lengua Castellana</option><option>Inglés</option><option>Matemáticas</option>
+              <option>Física y Química</option><option>Biología y Geología</option><option>Historia</option>
+            </select></div>
+            <div class="fg"><label>Curso</label><select id="in-c">
+              <option>1º ESO</option><option>2º ESO</option><option selected>3º ESO</option><option>4º ESO</option>
+              <option>1º Bachillerato</option><option>2º Bachillerato</option>
+            </select></div>
           </div>
-          <div class="fg"><label>Observaciones del docente</label>
-            <textarea id="in-obs" rows="2" placeholder="Actitud, participación, dificultades específicas, puntos fuertes..."></textarea></div>
+          <div class="fg"><label>Observaciones del profesor</label>
+            <textarea id="in-obs" rows="2" placeholder="Dificultades observadas, puntos fuertes, comportamiento en clase..."></textarea></div>
           <button class="btn btn-primary" onclick="genInf()">Generar informe</button>
+          <div class="spin-row" id="sp-i"><div class="spin"></div>Generando informe...</div>
+          <div class="rw" id="rw-i">
+            <div class="rh"><span class="rl">Informe generado</span><div class="btn-row"><button class="btn btn-sm" onclick="cp('r-i')">Copiar</button><button class="btn btn-sm btn-teal" onclick="imprimir('r-i')">Imprimir</button></div></div>
+            <div class="rb" id="r-i"></div>
+          </div>
         </div>
-
         <div id="rt-aci" style="display:none">
           <div class="g2">
-            <div class="fg"><label>Nombre del alumno</label><input id="ac-alu" placeholder="Carlos Martínez"></div>
-            <div class="fg"><label>Necesidad educativa especial</label>
-              <select id="ac-nee"><option>TDAH</option><option>Dislexia</option><option>TEA</option><option>Discapacidad auditiva</option><option>Discapacidad visual</option><option>Altas capacidades</option><option>Incorporación tardía al sistema educativo</option><option>Otra</option></select></div>
-            <div class="fg"><label>Asignatura</label><select id="ac-asig"><option>Lengua Castellana</option>
-                <option>Lengua y Literatura</option>
-                <option>Inglés</option>
-                <option>Francés</option>
-                <option>Alemán</option>
-                <option>Matemáticas</option>
-                <option>Matemáticas Aplicadas</option>
-                <option>Física y Química</option>
-                <option>Física</option>
-                <option>Química</option>
-                <option>Biología y Geología</option>
-                <option>Biología</option>
-                <option>Historia de España</option>
-                <option>Historia del Mundo Contemporáneo</option>
-                <option>Geografía e Historia</option>
-                <option>Filosofía</option>
-                <option>Economía</option>
-                <option>Tecnología</option>
-                <option>Informática</option>
-                <option>Educación Plástica y Visual</option>
-                <option>Música</option>
-                <option>Educación Física</option>
-                <option>Religión</option>
-                <option>Valores Éticos</option>
-                <option>Latín</option>
-                <option>Griego</option></select></div>
-            <div class="fg"><label>Curso</label>
-              <select id="ac-c"><option>1º ESO</option><option selected>2º ESO</option><option>3º ESO</option><option>4º ESO</option></select></div>
+            <div class="fg"><label>Alumno</label><input id="ac-alu" placeholder="Nombre del alumno"></div>
+            <div class="fg"><label>Asignatura</label><select id="ac-a">
+              <option>Lengua Castellana</option><option>Inglés</option><option>Matemáticas</option>
+              <option>Física y Química</option><option>Biología y Geología</option><option>Historia</option>
+            </select></div>
           </div>
-          <div class="fg"><label>Dificultades observadas en el aula</label>
-            <textarea id="ac-desc" rows="2" placeholder="Describe las dificultades específicas que observas en el alumno durante las clases..."></textarea></div>
-          <button class="btn btn-primary" onclick="genACI()">Generar adaptación curricular</button>
-        </div>
-
-        <div class="spin-row" id="sp-r"><div class="spin"></div>Generando documento...</div>
-        <div class="rw" id="rw-r">
-          <div class="rh">
-            <span class="rl" id="rl-r">Documento generado</span>
-            <div class="btn-row">
-              <button class="btn btn-sm" onclick="cp('r-r')">Copiar</button>
-              <button class="btn btn-sm btn-teal" onclick="imprimir('r-r')">Imprimir</button>
-            </div>
+          <div class="fg"><label>Necesidades específicas del alumno</label>
+            <textarea id="ac-nec" rows="3" placeholder="Describe las dificultades: dislexia, TDAH, discalculia, barrera idiomática..."></textarea></div>
+          <button class="btn btn-primary" onclick="genACI()">Generar ACI</button>
+          <div class="spin-row" id="sp-a"><div class="spin"></div>Generando ACI...</div>
+          <div class="rw" id="rw-a">
+            <div class="rh"><span class="rl">ACI generada</span><div class="btn-row"><button class="btn btn-sm" onclick="cp('r-a')">Copiar</button><button class="btn btn-sm btn-teal" onclick="imprimir('r-a')">Imprimir</button></div></div>
+            <div class="rb" id="r-a"></div>
           </div>
-          <div class="rb" id="r-r"></div>
         </div>
       </div>
 
@@ -1120,63 +1019,50 @@ tr:hover td { background: var(--bg-hi); }
       <div class="panel" id="p-mates">
         <div class="pt">Matemáticas <span>adaptativas</span></div>
         <div class="pd">Genera ejercicios por nivel y tema — con variantes A/B para evitar copias</div>
-
         <div class="card">
           <div class="card-label">Configuración</div>
           <div class="g2">
             <div class="fg"><label>Curso</label>
               <select id="m-curso">
-                <option>1º Primaria</option><option>2º Primaria</option><option>3º Primaria</option>
-                <option>4º Primaria</option><option>5º Primaria</option><option>6º Primaria</option>
-                <option selected>1º ESO</option><option>2º ESO</option><option>3º ESO</option>
-                <option>4º ESO</option><option>1º Bachillerato</option><option>2º Bachillerato</option>
+                <option>3º Primaria</option><option>4º Primaria</option><option>5º Primaria</option><option>6º Primaria</option>
+                <option selected>1º ESO</option><option>2º ESO</option><option>3º ESO</option><option>4º ESO</option>
+                <option>1º Bachillerato</option><option>2º Bachillerato</option>
               </select></div>
-            <div class="fg"><label>Número de ejercicios</label>
-              <input id="m-num" type="number" min="3" max="20" value="8"></div>
+            <div class="fg"><label>Número de ejercicios</label><input id="m-num" type="number" min="3" max="25" value="8"></div>
           </div>
-
           <div class="sect-div">Nivel de dificultad</div>
-          <div class="g3" style="margin-bottom:14px">
-            <div class="nivel-card on" onclick="selNivel(this,'basico')" id="nv-basico">
-              <svg width="24" height="14" viewBox="0 0 24 14" style="display:block;margin:0 auto 6px">
-                <circle cx="4" cy="7" r="5" fill="#4ADE80"/>
-                <circle cx="12" cy="7" r="5" fill="var(--border)"/>
-                <circle cx="20" cy="7" r="5" fill="var(--border)"/>
-              </svg>
-              <div class="nivel-label">Básico</div>
-              <div class="nivel-sub">Consolidación</div>
-            </div>
-            <div class="nivel-card" onclick="selNivel(this,'medio')" id="nv-medio">
-              <svg width="24" height="14" viewBox="0 0 24 14" style="display:block;margin:0 auto 6px">
-                <circle cx="4" cy="7" r="5" fill="#FBBF24"/>
-                <circle cx="12" cy="7" r="5" fill="#FBBF24"/>
-                <circle cx="20" cy="7" r="5" fill="var(--border)"/>
-              </svg>
-              <div class="nivel-label">Medio</div>
-              <div class="nivel-sub">Aplicación</div>
-            </div>
-            <div class="nivel-card" onclick="selNivel(this,'avanzado')" id="nv-avanzado">
-              <svg width="24" height="14" viewBox="0 0 24 14" style="display:block;margin:0 auto 6px">
-                <circle cx="4" cy="7" r="5" fill="#9B7AFE"/>
-                <circle cx="12" cy="7" r="5" fill="#9B7AFE"/>
-                <circle cx="20" cy="7" r="5" fill="#9B7AFE"/>
-              </svg>
-              <div class="nivel-label">Avanzado</div>
-              <div class="nivel-sub">Profundización</div>
-            </div>
+          <div class="niv-row">
+            <button class="niv-btn on" id="nv-basico" onclick="selNivel('basico',this)">
+              <div class="niv-dots"><div class="dot fill"></div><div class="dot"></div><div class="dot"></div></div>
+              <div class="niv-name">Básico</div><div class="niv-sub">Consolidación</div>
+            </button>
+            <button class="niv-btn" id="nv-medio" onclick="selNivel('medio',this)">
+              <div class="niv-dots"><div class="dot fill"></div><div class="dot fill"></div><div class="dot"></div></div>
+              <div class="niv-name">Medio</div><div class="niv-sub">Aplicación</div>
+            </button>
+            <button class="niv-btn" id="nv-avanzado" onclick="selNivel('avanzado',this)">
+              <div class="niv-dots"><div class="dot fill"></div><div class="dot fill"></div><div class="dot fill"></div></div>
+              <div class="niv-name">Avanzado</div><div class="niv-sub">Profundización</div>
+            </button>
           </div>
-
           <div class="sect-div">Bloque temático</div>
           <div class="tag-wrap" id="bloq">
-            <button class="tag teal on" onclick="togTeal(this)">Números y operaciones</button>
-            <button class="tag teal" onclick="togTeal(this)">Álgebra y expresiones</button>
-            <button class="tag teal" onclick="togTeal(this)">Geometría</button>
-            <button class="tag teal" onclick="togTeal(this)">Estadística y probabilidad</button>
-            <button class="tag teal" onclick="togTeal(this)">Funciones y gráficas</button>
-            <button class="tag teal" onclick="togTeal(this)">Medida y magnitudes</button>
-            <button class="tag teal" onclick="togTeal(this)">Problemas contextualizados</button>
+            <button class="tag on" onclick="tog(this)">Números y operaciones</button>
+            <button class="tag" onclick="tog(this)">Álgebra y expresiones</button>
+            <button class="tag" onclick="tog(this)">Geometría</button>
+            <button class="tag" onclick="tog(this)">Estadística y probabilidad</button>
+            <button class="tag" onclick="tog(this)">Funciones y gráficas</button>
+            <button class="tag" onclick="tog(this)">Medida y magnitudes</button>
+            <button class="tag" onclick="tog(this)">Problemas contextualizados</button>
+            <button class="tag" onclick="tog(this)">Fracciones</button>
+            <button class="tag" onclick="tog(this)">Decimales</button>
+            <button class="tag" onclick="tog(this)">Potencias y raíces</button>
+            <button class="tag" onclick="tog(this)">Ecuaciones</button>
+            <button class="tag" onclick="tog(this)">Sistemas</button>
+            <button class="tag" onclick="tog(this)">Probabilidad</button>
+            <button class="tag" onclick="tog(this)">Trigonometría</button>
+            <button class="tag" onclick="tog(this)">Matrices</button>
           </div>
-
           <div class="sect-div">Formato de entrega</div>
           <div class="tag-wrap" id="fmt">
             <button class="tag on" onclick="tog(this)">Con espacio para responder</button>
@@ -1184,127 +1070,66 @@ tr:hover td { background: var(--bg-hi); }
             <button class="tag" onclick="tog(this)">Con pasos intermedios</button>
             <button class="tag" onclick="tog(this)">Solo enunciados</button>
           </div>
-
           <div class="fg"><label>Instrucciones adicionales (opcional)</label>
-            <textarea id="m-extra" rows="2" placeholder="Ej: incluir problemas de contexto real, evitar fracciones, adaptar para alumno con dislexia, incluir gráficas..."></textarea></div>
-
+            <textarea id="m-extra" rows="2" placeholder="Ej: incluir problemas de contexto real, evitar fracciones, adaptar para alumno con dislexia..."></textarea></div>
           <div class="btn-row">
             <button class="btn btn-primary" onclick="genMates()">Generar ejercicios</button>
             <button class="btn btn-teal" onclick="genMatesAB()">Generar variante A / B</button>
           </div>
         </div>
-
-        <div class="spin-row" id="sp-m"><div class="spin"></div>Generando ejercicios adaptados...</div>
+        <div class="spin-row" id="sp-m"><div class="spin"></div>Generando ejercicios...</div>
         <div class="rw" id="rw-m">
           <div class="rh">
-            <div>
-              <span class="rl">Ejercicios generados</span>
-              <div class="mat-badge" id="m-badge">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                Nivel básico · 1º ESO
-              </div>
-            </div>
+            <span class="rl">Ejercicios generados</span>
+            <span class="badge" id="m-badge" style="margin-left:8px"></span>
             <div class="btn-row">
-              <button class="btn btn-sm" onclick="cp('r-m')">Copiar</button>
-              <button class="btn btn-sm btn-teal" onclick="imprimir('r-m')">Imprimir</button>
+              <button class="btn btn-sm" onclick="mostrarSoluciones()">Ver soluciones</button>
+              <button class="btn btn-sm btn-teal" onclick="imprimirTest()">Imprimir</button>
             </div>
           </div>
-          <div class="rb" id="r-m"></div>
+          <div id="r-m"></div>
+          <div class="progress" id="progreso"></div>
         </div>
       </div>
 
       <!-- FAMILIAS -->
       <div class="panel" id="p-familias">
         <div class="pt">Comunicación con <span>familias</span></div>
-        <div class="pd">Redacta emails profesionales y personalizados en segundos</div>
-
-        <div class="tag-wrap" id="fam-t">
-          <button class="tag on" onclick="selFT(this,'citacion')">Citación</button>
-          <button class="tag" onclick="selFT(this,'felicitacion')">Felicitación</button>
-          <button class="tag" onclick="selFT(this,'conducta')">Conducta</button>
-          <button class="tag" onclick="selFT(this,'seguimiento')">Seguimiento</button>
-          <button class="tag" onclick="selFT(this,'trimestre')">Fin de trimestre</button>
-          <button class="tag" onclick="selFT(this,'ausencias')">Ausencias</button>
-        </div>
-
+        <div class="pd">Genera emails personalizados para cada situación — citaciones, boletines, felicitaciones y más</div>
         <div class="card">
+          <div class="card-label">Configuración</div>
           <div class="g2">
-            <div class="fg"><label>Alumno/a</label><input id="f-alu" placeholder="Nombre del alumno"></div>
-            <div class="fg"><label>Email de la familia</label><input id="f-mail" type="email" placeholder="familia@email.com"></div>
-            <div class="fg"><label>Dirigido a</label><input id="f-tut" placeholder="Sr. / Sra. García"></div>
-            <div class="fg"><label>Tu nombre</label><input id="f-prof" value="Prof. García"></div>
+            <div class="fg"><label>Alumno</label><input id="f-alu" placeholder="Nombre del alumno"></div>
+            <div class="fg"><label>Email familia</label><input type="email" id="f-mail" placeholder="familia@email.com"></div>
+            <div class="fg"><label>Nota media</label><input id="f-nota" type="number" min="1" max="10" step="0.5" placeholder="6.5"></div>
+            <div class="fg"><label>Asignatura</label><select id="f-asig">
+              <option>Lengua Castellana</option><option>Inglés</option><option>Matemáticas</option>
+              <option>Física y Química</option><option>Biología y Geología</option><option>Historia</option>
+            </select></div>
           </div>
-          <div class="fg"><label>Situación a comunicar</label>
-            <textarea id="f-sit" rows="3" placeholder="Describe brevemente la situación que motiva el contacto con la familia..."></textarea></div>
-          <div class="btn-row">
-            <button class="btn btn-primary" onclick="genFam()">Generar email</button>
-            <button class="btn btn-teal" onclick="genEnvFam()">Generar y enviar</button>
+          <div class="sect-div">Tipo de comunicación</div>
+          <div class="tag-wrap" id="ftipo">
+            <button class="tag on" id="f-citacion" onclick="selFam('citacion',this)">Citación</button>
+            <button class="tag" id="f-boletin" onclick="selFam('boletin',this)">Boletín notas</button>
+            <button class="tag" id="f-felicita" onclick="selFam('felicita',this)">Felicitación</button>
+            <button class="tag" id="f-alerta" onclick="selFam('alerta',this)">Alerta académica</button>
+            <button class="tag" id="f-conduct" onclick="selFam('conduct',this)">Conducta</button>
+            <button class="tag" id="f-recup" onclick="selFam('recup',this)">Plan recuperación</button>
           </div>
+          <div class="fg" style="margin-top:12px"><label>Observaciones adicionales</label>
+            <textarea id="f-obs" rows="2" placeholder="Detalles específicos para incluir en el email..."></textarea></div>
+          <button class="btn btn-primary" onclick="genFam()">Generar email</button>
         </div>
-
-        <div class="spin-row" id="sp-f"><div class="spin"></div>Redactando email profesional...</div>
+        <div class="spin-row" id="sp-f"><div class="spin"></div>Generando email...</div>
         <div class="rw" id="rw-f">
           <div class="rh">
             <span class="rl">Email generado</span>
             <div class="btn-row">
               <button class="btn btn-sm" onclick="cp('r-f')">Copiar</button>
-              <button class="btn btn-sm btn-primary" onclick="envFam()">Enviar ahora</button>
+              <button class="btn btn-sm btn-teal" onclick="abrirEmail()">Abrir en email</button>
             </div>
           </div>
           <div class="rb" id="r-f"></div>
-          <div class="success-msg" id="f-ok">Email enviado correctamente a <span id="f-dest"></span></div>
-        </div>
-      </div>
-
-      <!-- EXÁMENES -->
-      <div class="panel" id="p-examenes">
-        <div class="pt">Exámenes con <span>autocorrección</span></div>
-        <div class="pd">Crea exámenes, imprímelos, introduce las respuestas de la clase y obtén notas al instante</div>
-
-        <!-- Sub-vista: lista -->
-        <div class="ex-sub active" id="exv-lista">
-          <div class="stats" id="ex-stats">
-            <div class="stat"><div class="stat-n" id="ex-st-ex">0</div><div class="stat-l">Exámenes</div></div>
-            <div class="stat"><div class="stat-n" id="ex-st-cor">0</div><div class="stat-l">Correcciones</div></div>
-            <div class="stat"><div class="stat-n" id="ex-st-med">—</div><div class="stat-l">Media global</div></div>
-            <div class="stat"><div class="stat-n" id="ex-st-al">0</div><div class="stat-l">Alumnos únicos</div></div>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-            <div style="font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)">Mis exámenes</div>
-            <button class="btn btn-primary btn-sm" onclick="exAbrirCrear()">+ Nuevo examen</button>
-          </div>
-          <div id="ex-lista"><div style="text-align:center;padding:30px;color:var(--text-muted)">No hay exámenes. Crea el primero.</div></div>
-        </div>
-
-        <!-- Sub-vista: detalle -->
-        <div class="ex-sub" id="exv-det">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-            <button class="btn btn-sm" onclick="exShowSub('lista')">← Volver</button>
-            <div id="ex-det-titulo" style="font-family:'Fraunces',serif;font-size:1.1rem;font-weight:600;flex:1"></div>
-            <button class="btn btn-sm btn-teal" onclick="exImprimir()">Imprimir examen</button>
-            <button class="btn btn-sm btn-primary" onclick="exAbrirCorregir()">Corregir clase →</button>
-          </div>
-          <div id="ex-det-content"></div>
-        </div>
-
-        <!-- Sub-vista: corrección -->
-        <div class="ex-sub" id="exv-corr">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-            <button class="btn btn-sm" onclick="exShowSub('det')">← Volver</button>
-            <div id="ex-corr-titulo" style="font-family:'Fraunces',serif;font-size:1rem;font-weight:600;flex:1"></div>
-            <button class="btn btn-sm btn-primary" onclick="exGuardarCorr()">Guardar y ver resultados</button>
-          </div>
-          <div id="ex-corr-content"></div>
-        </div>
-
-        <!-- Sub-vista: resultados -->
-        <div class="ex-sub" id="exv-res">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-            <button class="btn btn-sm" onclick="exShowSub('det')">← Volver</button>
-            <div id="ex-res-titulo" style="font-family:'Fraunces',serif;font-size:1rem;font-weight:600;flex:1"></div>
-            <button class="btn btn-sm" onclick="window.print()">Imprimir resultados</button>
-          </div>
-          <div id="ex-res-content"></div>
         </div>
       </div>
 
@@ -1312,90 +1137,35 @@ tr:hover td { background: var(--bg-hi); }
   </div>
 </div>
 
-<!-- ═══════════════════════════════
-     PANEL EXÁMENES — HTML
-═══════════════════════════════ -->
-<style>
-.ex-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:15px 18px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;transition:border-color .15s}
-.ex-card:hover{border-color:var(--border-hi)}
-.ex-title{font-weight:600;color:var(--text);font-size:.93rem;margin-bottom:3px}
-.ex-meta{font-size:.73rem;color:var(--text-muted);display:flex;gap:10px;flex-wrap:wrap}
-.qb-ex{background:var(--bg-deep);border:1.5px solid var(--border);border-radius:var(--rsm,8px);padding:13px 15px;margin-bottom:10px;position:relative}
-.qb-num{position:absolute;top:10px;right:10px;font-size:.68rem;font-weight:700;color:var(--text-muted);background:var(--bg-card);border:1px solid var(--border);border-radius:4px;padding:2px 7px}
-.ol-ex{display:flex;gap:6px;align-items:center;margin-bottom:6px}
-.ol-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);background:transparent;font-size:12px;font-weight:700;cursor:pointer;color:var(--text-muted);font-family:inherit;transition:all .15s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.ol-btn.on{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-hi)}
-.oi-ex{flex:1;padding:7px 10px;border:1.5px solid var(--border);border-radius:4px;font-size:12px;background:var(--bg-card);color:var(--text);font-family:inherit;outline:none}
-.oi-ex:focus{border-color:var(--primary)}
-.ct-ex{overflow-x:auto;margin-bottom:14px}
-.ctb-ex{border-collapse:collapse;font-size:12px;width:100%;min-width:380px}
-.ctb-ex th{padding:8px 7px;text-align:center;font-size:.62rem;font-weight:700;color:var(--primary-hi);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg-deep);white-space:nowrap}
-.ctb-ex th.thn{text-align:left;min-width:110px}
-.ctb-ex td{padding:5px 5px;border-bottom:1px solid var(--border);text-align:center;vertical-align:middle}
-.ctb-ex td.tdn{text-align:left;font-weight:500;color:var(--text);font-size:13px;padding-left:8px}
-.ctb-ex tr:hover td{background:var(--bg-hi)}.ctb-ex tr:last-child td{border-bottom:none}
-.os-ex{display:flex;gap:3px;justify-content:center}
-.ob-ex{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);background:transparent;font-size:10px;font-weight:700;cursor:pointer;color:var(--text-muted);font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.ob-ex:hover{border-color:var(--primary);color:var(--primary-hi)}
-.ob-ex.sel-ex{background:var(--primary-soft);border-color:var(--primary);color:var(--primary-hi)}
-.ob-ex.ok-ex{background:rgba(74,222,128,.2);border-color:var(--success);color:var(--success)}
-.ob-ex.ko-ex{background:rgba(248,113,113,.12);border-color:var(--danger);color:var(--danger);opacity:.7}
-.nc-ex{font-weight:700;font-size:.88rem}
-.nc-ex.alta{color:var(--success)}.nc-ex.media{color:var(--warn)}.nc-ex.baja{color:var(--danger)}.nc-ex.v{color:var(--text-muted)}
-.br-ex{display:flex;align-items:center;gap:8px;margin-bottom:5px}
-.bl-ex{width:110px;font-size:.72rem;color:var(--text-soft);text-align:right;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bt-ex{flex:1;height:8px;background:var(--bg-deep);border-radius:4px;overflow:hidden}
-.bf-ex{height:100%;border-radius:4px;transition:width .5s ease}
-.bv-ex{width:36px;font-size:.72rem;font-weight:600;text-align:right;flex-shrink:0}
-.ex-sub{display:none}.ex-sub.active{display:block;animation:fadeUp .22s ease}
-@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
-.rh-ex{text-align:center;padding:22px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:14px}
-.rn-ex{font-family:'Fraunces',serif;font-size:3.2rem;font-weight:700;line-height:1}
-.rn-ex.alta{color:var(--success)}.rn-ex.media{background:linear-gradient(135deg,var(--primary-hi),var(--teal));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}.rn-ex.baja{color:var(--danger)}
-</style>
+<!-- BOTTOM NAV — mobile only -->
+<nav class="bottom-nav">
+  <button class="bn-btn active" id="bn-clases" onclick="sw('clases',0)">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+    <span>Clases</span>
+  </button>
+  <button class="bn-btn" id="bn-corrector" onclick="sw('corrector',1)">
+    <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+    <span>Notas</span>
+  </button>
+  <button class="bn-btn" id="bn-tests" onclick="sw('tests',2)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg>
+    <span>Tests</span>
+  </button>
+  <button class="bn-btn" id="bn-rubricas" onclick="sw('rubricas',3)">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+    <span>Rúbricas</span>
+  </button>
+  <button class="bn-btn" id="bn-mates" onclick="sw('mates',4)">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <span>Mates</span>
+  </button>
+  <button class="bn-btn" id="bn-familias" onclick="sw('familias',5)">
+    <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/></svg>
+    <span>Familias</span>
+  </button>
+</nav>
 
-<!-- MODALS EXÁMENES -->
-<div class="modal-overlay" id="modal-ex-crear">
-  <div class="modal" style="max-width:700px">
-    <div style="padding:17px 22px 0;font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600" id="modal-ex-tit">Nuevo examen</div>
-    <div style="padding:15px 22px">
-      <div class="g2">
-        <div class="fg"><label>Título del examen</label><input id="ex-tit" placeholder="Examen Tema 3"></div>
-        <div class="fg"><label>Clase / Grupo</label><input id="ex-clase" placeholder="3º ESO A"></div>
-        <div class="fg"><label>Asignatura</label>
-          <select id="ex-asig"><option>Lengua Castellana</option><option>Lengua y Literatura</option><option>Inglés</option><option>Francés</option><option>Alemán</option><option selected>Matemáticas</option><option>Matemáticas Aplicadas</option><option>Física y Química</option><option>Física</option><option>Química</option><option>Biología y Geología</option><option>Historia de España</option><option>Historia del Mundo Contemporáneo</option><option>Geografía e Historia</option><option>Filosofía</option><option>Economía</option><option>Tecnología</option><option>Informática</option><option>Educación Física</option><option>Religión</option><option>Valores Éticos</option></select>
-        </div>
-        <div class="fg"><label>Fecha</label><input type="date" id="ex-fecha"></div>
-      </div>
-      <div class="fg"><label>Instrucciones (opcional)</label><textarea id="ex-inst" placeholder="Rodea con un círculo la letra de la respuesta correcta..."></textarea></div>
-      <div style="height:1px;background:var(--border);margin:13px 0"></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div style="font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--primary-hi)">Preguntas</div>
-        <button class="btn btn-primary btn-sm" onclick="exAddQ()">+ Añadir pregunta</button>
-      </div>
-      <div id="ex-qbuilder"><div style="text-align:center;padding:16px;color:var(--text-muted);font-size:.88rem">Añade preguntas.</div></div>
-    </div>
-    <div style="padding:12px 22px 16px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end">
-      <button class="btn" onclick="cerrarOverlay('modal-ex-crear')">Cancelar</button>
-      <button class="btn btn-primary" onclick="exGuardar()">Guardar examen</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="modal-ex-alumnos">
-  <div class="modal" style="max-width:400px">
-    <div style="padding:17px 22px 0;font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600">Gestionar alumnos</div>
-    <div style="padding:15px 22px">
-      <div class="fg"><label>Nombre del alumno</label><input id="ex-al-n" placeholder="Nombre y apellido" onkeydown="if(event.key==='Enter')exAddAl()"></div>
-      <button class="btn btn-primary" onclick="exAddAl()" style="width:100%;justify-content:center;margin-bottom:12px">Añadir alumno</button>
-      <div style="height:1px;background:var(--border);margin-bottom:12px"></div>
-      <div id="ex-al-lista" style="max-height:250px;overflow-y:auto"></div>
-    </div>
-    <div style="padding:12px 22px 16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end">
-      <button class="btn btn-primary" onclick="cerrarOverlay('modal-ex-alumnos')">Listo</button>
-    </div>
-  </div>
-</div>
+<!-- MODAL ALUMNO -->
 <div class="modal-overlay" id="m-alu">
   <div class="modal">
     <div class="modal-title">Añadir alumno</div>
@@ -1412,42 +1182,10 @@ tr:hover td { background: var(--bg-hi); }
   </div>
 </div>
 
-<!-- BOTTOM NAV — mobile only -->
-<nav class="bottom-nav">
-  <button class="bn-btn active" id="bn-clases" onclick="sw('clases',0)">
-    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    <span>Clases</span>
-  </button>
-  <button class="bn-btn" id="bn-corrector" onclick="sw('corrector',1)">
-    <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
-    <span>Notas</span>
-  </button>
-  <button class="bn-btn" id="bn-tests" onclick="sw('tests',2)">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-    <span>Tests</span>
-  </button>
-  <button class="bn-btn" id="bn-rubricas" onclick="sw('rubricas',3)">
-    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-    <span>Rúbricas</span>
-  </button>
-  <button class="bn-btn" id="bn-mates" onclick="sw('mates',4)">
-    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    <span>Mates</span>
-  </button>
-  <button class="bn-btn" id="bn-familias" onclick="sw('familias',5)">
-    <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-    <span>Familias</span>
-  </button>
-  <button class="bn-btn" id="bn-examenes" onclick="sw('examenes',6)">
-    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-    <span>Exámenes</span>
-  </button>
-</nav>
-
 <script>
 // =====================================================
-var PAGES = ['Gestión de clases','Registro de notas','Generador de tests','Rúbricas e informes','Matemáticas adaptativas','Comunicación con familias','Exámenes y autocorrección'];
-var PANELS = ['clases','corrector','tests','rubricas','mates','familias','examenes'];
+var PAGES = ['Gestión de clases','Registro de notas','Generador de tests','Rúbricas e informes','Matemáticas adaptativas','Comunicación con familias'];
+var PANELS = ['clases','corrector','tests','rubricas','mates','familias'];
 var cA = '1A', nivelMat = 'basico', famTipo = 'citacion', fileB64 = null;
 
 var D = {
@@ -1495,6 +1233,22 @@ function selNivel(el, n) {
   nivelMat = n;
   ['basico','medio','avanzado'].forEach(function(id) { document.getElementById('nv-'+id).classList.remove('on'); });
   el.classList.add('on');
+}
+
+function swCls(id, el) {
+  document.querySelectorAll('.cls-tab').forEach(function(b) {
+    b.style.borderColor = 'var(--border)';
+    b.style.background = 'transparent';
+    b.style.color = 'var(--text-muted)';
+    b.style.fontWeight = '500';
+  });
+  el.style.borderColor = 'var(--primary)';
+  el.style.background = 'var(--primary-soft)';
+  el.style.color = 'var(--primary-hi)';
+  el.style.fontWeight = '600';
+  cA = id;
+  document.getElementById('sl-total').textContent = 'Alumnos · ' + id.replace('1A','1ºA').replace('1B','1ºB').replace('2A','2ºA').replace('3A','3ºA');
+  render();
 }
 
 function selC(el, id) {
@@ -4096,13 +3850,8 @@ function exImprimir(){
   var pw=window.open('','_blank');pw.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>'+ex.titulo+'</title>'+css+'</head><body>'+h+'</body></html>');pw.document.close();pw.focus();setTimeout(function(){pw.print()},500);
 }
 
-// Hook sw para inicializar exámenes al entrar
-var _sw0=sw;sw=function(p,i){_sw0(p,i);if(p==='examenes'){exRenderDash();exShowSub('lista')}};
-
-// Demo
-if(!EXdb.examenes.length){ /* sin demo */ }
-
 ['modal-ex-crear','modal-ex-alumnos'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('click',function(e){if(e.target===el)el.classList.remove('open')})});
+
 </script>
 </body>
 </html>
