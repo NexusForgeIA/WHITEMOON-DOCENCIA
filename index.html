@@ -64,14 +64,13 @@ body::after {
 }
 
 .app {
-  display: grid;
-  grid-template-columns: 60px 1fr;
+  display: block;
   min-height: 100vh;
   position: relative;
   z-index: 1;
 }
 
-/* SIDEBAR */
+/* SIDEBAR — desktop */
 .sidebar {
   background: rgba(10,7,24,.92);
   border-right: 1px solid var(--border);
@@ -89,6 +88,78 @@ body::after {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
+
+/* MOBILE — bottom nav bar, no sidebar */
+@media (max-width: 768px) {
+  .app {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    display: none;
+  }
+  .content {
+    margin-left: 0 !important;
+    padding-bottom: 70px;
+  }
+  .bottom-nav {
+    display: flex !important;
+  }
+}
+
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 62px;
+  background: rgba(10,7,24,.96);
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 100;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 4px;
+}
+
+.bn-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  transition: all .15s;
+  outline: none;
+  min-width: 44px;
+}
+
+.bn-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--text-muted);
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke .15s;
+  pointer-events: none;
+}
+
+.bn-btn span {
+  font-size: 9px;
+  font-family: 'Inter', sans-serif;
+  color: var(--text-muted);
+  transition: color .15s;
+  white-space: nowrap;
+}
+
+.bn-btn.active svg { stroke: var(--primary-hi); }
+.bn-btn.active span { color: var(--primary-hi); }
 
 .sb-logo {
   font-family: 'Fraunces', serif;
@@ -175,6 +246,8 @@ body::after {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .topbar {
@@ -189,6 +262,7 @@ body::after {
   position: sticky;
   top: 0;
   z-index: 50;
+  gap: 12px;
 }
 
 .tb-brand {
@@ -245,10 +319,21 @@ body::after {
   flex: 1;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .main { padding: 16px; }
   .topbar { padding: 12px 16px; }
   .tb-name { display: none; }
+  .stats { grid-template-columns: repeat(2,1fr); }
+  .g2 { grid-template-columns: 1fr; }
+  .g3 { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .tag-wrap { gap: 5px; }
+  .tag { font-size: 11px; padding: 4px 10px; }
+  .btn { font-size: 12px; padding: 7px 12px; }
+  .btn-sm { font-size: 11px; padding: 4px 8px; }
+  .pt { font-size: 1.2rem; }
 }
 
 .panel { display: none; animation: fi .22s ease; }
@@ -1233,9 +1318,35 @@ tr:hover td { background: var(--bg-hi); }
   </div>
 </div>
 
+<!-- BOTTOM NAV — mobile only -->
+<nav class="bottom-nav">
+  <button class="bn-btn active" id="bn-clases" onclick="sw('clases',0)">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span>Clases</span>
+  </button>
+  <button class="bn-btn" id="bn-corrector" onclick="sw('corrector',1)">
+    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span>Corrector</span>
+  </button>
+  <button class="bn-btn" id="bn-tests" onclick="sw('tests',2)">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <span>Tests</span>
+  </button>
+  <button class="bn-btn" id="bn-rubricas" onclick="sw('rubricas',3)">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+    <span>Rúbricas</span>
+  </button>
+  <button class="bn-btn" id="bn-mates" onclick="sw('mates',4)">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <span>Mates</span>
+  </button>
+  <button class="bn-btn" id="bn-familias" onclick="sw('familias',5)">
+    <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    <span>Familias</span>
+  </button>
+</nav>
+
 <script>
-// =====================================================
-// DATOS
 // =====================================================
 var PAGES = ['Gestión de clases','Corrector de exámenes','Generador de tests','Rúbricas e informes','Matemáticas adaptativas','Comunicación con familias'];
 var PANELS = ['clases','corrector','tests','rubricas','mates','familias'];
@@ -1260,10 +1371,15 @@ var D = {
 // =====================================================
 function sw(p, i) {
   PANELS.forEach(function(id) {
-    document.getElementById('btn-'+id).classList.toggle('active', id === p);
-    document.getElementById('p-'+id).classList.toggle('active', id === p);
+    var sbBtn = document.getElementById('btn-'+id);
+    var bnBtn = document.getElementById('bn-'+id);
+    var panel = document.getElementById('p-'+id);
+    if (sbBtn) sbBtn.classList.toggle('active', id === p);
+    if (bnBtn) bnBtn.classList.toggle('active', id === p);
+    if (panel) panel.classList.toggle('active', id === p);
   });
   document.getElementById('tb-page').textContent = PAGES[i];
+  window.scrollTo(0, 0);
 }
 
 function swT(show, hide, el) {
