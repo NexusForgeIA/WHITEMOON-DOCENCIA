@@ -754,7 +754,29 @@ tr:hover td { background: var(--bg-hi); }
   .card { background: white; color: black; border: 1px solid #ccc; }
   .rb { color: black; background: #f9f9f9; border: 1px solid #ddd; max-height: none; }
 }
-</style>
+
+/* ── Estilos ejercicios matemáticas algorítmicas ── */
+.ej{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rsm);padding:14px 16px;margin-bottom:10px;position:relative;transition:border-color .15s}
+.ej:hover{border-color:var(--border-hi)}
+.ej-num{position:absolute;top:12px;right:12px;font-size:.68rem;font-weight:600;color:var(--text-muted);background:var(--bg-deep);border:1px solid var(--border);border-radius:var(--rxs);padding:2px 7px}
+.ej-texto{font-size:.92rem;color:var(--text);line-height:1.6;margin-bottom:10px;padding-right:44px}
+.ej-opciones{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.opcion{padding:5px 12px;border:1.5px solid var(--border);border-radius:var(--rxs);font-size:.82rem;cursor:pointer;background:var(--bg-deep);color:var(--text-soft);transition:all .15s;font-family:inherit;font-weight:500}
+.opcion:hover{border-color:var(--primary);color:var(--primary-hi);background:var(--primary-soft)}
+.opcion.correcta-reveal{border-color:var(--success)!important;background:rgba(74,222,128,.12)!important;color:var(--success)!important}
+.opcion.incorrecta-reveal{border-color:var(--danger)!important;background:rgba(248,113,113,.08)!important;color:var(--danger)!important;opacity:.6}
+.opcion.elegida{border-color:var(--primary);background:var(--primary-soft);color:var(--primary-hi)}
+.ej-espacio{border:1px dashed var(--border);border-radius:var(--rxs);padding:10px;margin-bottom:8px;min-height:40px;font-size:.8rem;color:var(--text-muted)}
+.sol-btn{background:none;border:none;color:var(--primary-hi);font-size:.76rem;font-family:inherit;cursor:pointer;padding:0;font-weight:500;transition:color .15s}
+.sol-btn:hover{color:var(--teal-hi)}
+.sol-box{display:none;margin-top:8px;padding:10px 12px;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.2);border-radius:var(--rxs);font-size:.82rem;color:var(--success);line-height:1.6}
+.sol-box.visible{display:block}
+.sol-pasos{font-size:.75rem;color:var(--text-muted);margin-top:4px;line-height:1.8}
+.tipo-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:600;letter-spacing:.04em;margin-bottom:7px;background:var(--primary-soft);border:1px solid var(--primary);color:var(--primary-hi)}
+.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 2px;font-size:.88em}
+.num-f{border-bottom:1px solid var(--teal-hi);padding:0 4px;color:var(--teal-hi);font-weight:600}
+.den-f{padding:0 4px;color:var(--teal-hi);font-weight:600}
+.progress{margin-top:8px;font-size:.76rem;color:var(--text-muted)}</style>
 </head>
 <body>
 
@@ -999,9 +1021,11 @@ tr:hover td { background: var(--bg-hi); }
             <button class="tag" onclick="tog(this)">Completar huecos</button>
             <button class="tag" onclick="tog(this)">Relacionar columnas</button>
           </div>
-          <div class="fg"><label>Tema o texto base</label>
-            <textarea id="t-tema" rows="3" placeholder="Escribe el tema o pega el texto sobre el que quieres generar el test...&#10;Ej: La oración compuesta: coordinadas, subordinadas y yuxtapuestas."></textarea></div>
+          <div style="font-size:.76rem;color:var(--teal-hi);background:var(--teal-soft);border:1px solid var(--teal);border-radius:var(--rsm);padding:8px 12px;margin-bottom:12px">
+            Sin API — banco de +500 preguntas para Lengua, Inglés, Historia, Biología, Física y Geografía. Matemáticas usa generador algorítmico.
+          </div>
           <button class="btn btn-primary" onclick="genTest()">Generar test completo</button>
+          <button class="btn btn-teal" style="margin-left:8px" onclick="genTestAB()">Variante A / B</button>
         </div>
 
         <div class="spin-row" id="sp-t"><div class="spin"></div>Generando preguntas...</div>
@@ -1009,11 +1033,11 @@ tr:hover td { background: var(--bg-hi); }
           <div class="rh">
             <span class="rl">Test generado</span>
             <div class="btn-row">
-              <button class="btn btn-sm" onclick="cp('r-t')">Copiar</button>
-              <button class="btn btn-sm btn-teal" onclick="imprimir('r-t')">Imprimir</button>
+              <button class="btn btn-sm" onclick="mostrarSolTests()">Ver respuestas</button>
+              <button class="btn btn-sm btn-teal" onclick="imprimirTest()">Imprimir</button>
             </div>
           </div>
-          <div class="rb" id="r-t"></div>
+          <div id="r-t"></div>
         </div>
       </div>
 
@@ -1783,20 +1807,93 @@ async function corregirImg() {
 // =====================================================
 // TESTS
 // =====================================================
-async function genTest() {
-  var tema = document.getElementById('t-tema').value;
-  if (!tema) { alert('Introduce el tema del test.'); return; }
-  var tipos = Array.from(document.querySelectorAll('#tq .tag.on')).map(function(b) { return b.textContent; }).join(', ');
-  if (!tipos) { alert('Selecciona al menos un tipo de pregunta.'); return; }
+function genTest() {
+  var n = Math.min(parseInt(document.getElementById('t-num').value) || 10, 30);
+  var asigNombre = document.getElementById('t-asig').value;
+  var cursoNombre = document.getElementById('t-curso').value;
+  var asigKey = ASIG_MAP[asigNombre];
+  var nivelKey = NIVEL_MAP[cursoNombre] || 'e1';
+  var tiposOn = Array.from(document.querySelectorAll('#tq .tag.on')).map(function(b) { return b.textContent.toLowerCase(); });
+  var tipoFiltro = 'todos';
+  if (tiposOn.length === 1) {
+    if (tiposOn[0].indexOf('múltiple') >= 0 || tiposOn[0].indexOf('multiple') >= 0) tipoFiltro = 'mc';
+    else if (tiposOn[0].indexOf('verdadero') >= 0) tipoFiltro = 'tf';
+  }
   showSp('sp-t'); hideR('rw-t');
-  var t = await claude(
-    'Genera un test de ' + document.getElementById('t-num').value + ' preguntas sobre "' + tema + '" para ' +
-    document.getElementById('t-asig').value + ' de ' + document.getElementById('t-curso').value +
-    '. Dificultad: ' + document.getElementById('t-dif').value + '. Tipos de pregunta: ' + tipos +
-    '.\n\nFormato:\n- Numera cada pregunta\n- Tipo entre paréntesis\n- Opción múltiple: opciones a/b/c/d con la correcta marcada con *\n- Al final: sección SOLUCIONES con las respuestas correctas de todas las preguntas'
-  );
-  hideSp('sp-t'); showR('rw-t', 'r-t', t);
+  if (asigKey && BANCO[asigKey]) {
+    var preguntas = generarBanco(asigKey, nivelKey, n, tipoFiltro);
+    if (preguntas && preguntas.length) {
+      document.getElementById('r-t').innerHTML = renderBancoEj(preguntas, false, 'T');
+      hideSp('sp-t'); document.getElementById('rw-t').classList.add('show'); return;
+    }
+  }
+  if (asigNombre.indexOf('Matem') >= 0) {
+    var mapaB2 = {'Números y operaciones':'operaciones','Álgebra y expresiones':'algebra','Geometría':'geometria','Estadística y probabilidad':'estadistica','Ecuaciones':'ecuaciones','Fracciones':'fracciones','Potencias y raíces':'potencias'};
+    temasSel = Object.values(mapaB2).filter(function(t,i,a){return a.indexOf(t)===i}).slice(0,3);
+    nivel = nivelMat;
+    var ejsMates = generarEjercicios();
+    if (ejsMates) { document.getElementById('r-t').innerHTML = ejsMates.map(function(e,i){return renderEj(e,i+1,false,'T')}).join(''); hideSp('sp-t'); document.getElementById('rw-t').classList.add('show'); return; }
+  }
+  hideSp('sp-t');
+  document.getElementById('r-t').innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">No hay preguntas para <strong>' + asigNombre + '</strong> en <strong>' + cursoNombre + '</strong>. Prueba otra combinación.</div>';
+  document.getElementById('rw-t').classList.add('show');
 }
+
+function genTestAB() {
+  var n = Math.min(Math.ceil((parseInt(document.getElementById('t-num').value) || 10) / 2) * 2, 30);
+  var asigNombre = document.getElementById('t-asig').value;
+  var cursoNombre = document.getElementById('t-curso').value;
+  var asigKey = ASIG_MAP[asigNombre];
+  var nivelKey = NIVEL_MAP[cursoNombre] || 'e1';
+  showSp('sp-t'); hideR('rw-t');
+  if (asigKey && BANCO[asigKey]) {
+    var pA = generarBanco(asigKey, nivelKey, n, 'todos');
+    var pB = generarBanco(asigKey, nivelKey, n, 'todos');
+    if (pA && pB) {
+      var html = '<div style="font-size:.78rem;font-weight:700;letter-spacing:.08em;color:var(--primary-hi);margin-bottom:10px;text-transform:uppercase">— Variante A —</div>';
+      html += renderBancoEj(pA, false, 'A');
+      html += '<div style="font-size:.78rem;font-weight:700;letter-spacing:.08em;color:var(--teal-hi);margin:16px 0 10px;text-transform:uppercase">— Variante B —</div>';
+      html += renderBancoEj(pB, false, 'B');
+      html += '<div style="font-size:.78rem;font-weight:700;letter-spacing:.08em;color:var(--primary-hi);margin:16px 0 10px;text-transform:uppercase">— Soluciones A —</div>';
+      html += renderBancoEj(pA, true, 'SA');
+      html += '<div style="font-size:.78rem;font-weight:700;letter-spacing:.08em;color:var(--teal-hi);margin:16px 0 10px;text-transform:uppercase">— Soluciones B —</div>';
+      html += renderBancoEj(pB, true, 'SB');
+      document.getElementById('r-t').innerHTML = html;
+      hideSp('sp-t'); document.getElementById('rw-t').classList.add('show'); return;
+    }
+  }
+  hideSp('sp-t');
+  document.getElementById('r-t').innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted)">No hay preguntas para esta combinación.</div>';
+  document.getElementById('rw-t').classList.add('show');
+}
+
+function mostrarSolTests() {
+  document.querySelectorAll('#r-t .sol-box').forEach(function(b){b.classList.add('visible')});
+  document.querySelectorAll('#r-t .sol-btn').forEach(function(b){b.textContent='Ocultar respuesta'});
+  document.querySelectorAll('#r-t .opcion').forEach(function(b,i){
+    // reveal correct answers in test
+  });
+}
+
+function imprimirTest() {
+  var asig = document.getElementById('t-asig').value;
+  var curso = document.getElementById('t-curso').value;
+  var cont = document.getElementById('r-t').innerHTML;
+  var css = '<style>body{font-family:Arial,sans-serif;font-size:11pt;color:#1a1a1a;padding:12mm 15mm}.ej{border-bottom:1px solid #ddd;padding:10px 2px;page-break-inside:avoid}.ej-texto{font-size:11pt;font-weight:500;margin-bottom:6px;padding-right:0}.tipo-badge{font-size:8pt;font-weight:700;color:#555;border:1px solid #ccc;padding:1px 6px;border-radius:12px;margin-bottom:5px;display:inline-block}.ej-num{float:right;font-size:9pt;color:#666;background:#f0f0f0;padding:2px 6px;border-radius:4px}.ej-opciones{display:flex;flex-wrap:wrap;gap:7px;margin:5px 0}.opcion{border:1px solid #888;border-radius:18px;padding:3px 12px;font-size:10pt}.sol-btn,.sol-box,.correcta-reveal,.incorrecta-reveal{display:none!important}.header{border-bottom:2px solid #222;margin-bottom:14px;padding-bottom:8px}.ht{font-size:14pt;font-weight:700}.hm{font-size:9pt;color:#666;margin-top:4px}.hrow{display:flex;gap:20px;margin-top:8px;font-size:10pt;border-top:1px solid #ccc;padding-top:8px}.hf{display:flex;align-items:flex-end;gap:5px;flex:1}.hf label{font-weight:700}.line{flex:1;border-bottom:1px solid #777}</style>';
+  var header = '<div class="header"><div style="display:flex;justify-content:space-between"><span style="font-weight:700">DocencIA</span><span style="font-size:10pt;color:#555">'+asig+' · '+curso+'</span></div><div class="ht">Test — '+asig+'</div><div class="hm">'+curso+' · '+document.querySelectorAll('#r-t .ej').length+' preguntas</div><div class="hrow"><div class="hf"><label>Nombre:</label><span class="line"></span></div><div class="hf"><label>Grupo:</label><span class="line" style="max-width:70px"></span></div><div class="hf"><label>Nota:</label><span class="line" style="max-width:50px"></span></div></div></div>';
+  var pw = window.open('','_blank');
+  pw.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Test '+asig+'</title>'+css+'</head><body>'+header+cont+'</body></html>');
+  pw.document.close(); pw.focus(); setTimeout(function(){pw.print()},500);
+}
+
+  // Tipo de pregunta
+  var tiposOn = Array.from(document.querySelectorAll('#tq .tag.on')).map(function(b) { return b.textContent.toLowerCase(); });
+  var tipoFiltro = 'todos';
+  if (tiposOn.length === 1) {
+    if (tiposOn[0].indexOf('múltiple') >= 0 || tiposOn[0].indexOf('multiple') >= 0) tipoFiltro = 'mc';
+    else if (tiposOn[0].indexOf('verdadero') >= 0) tipoFiltro = 'tf';
+  }
+
 
 // =====================================================
 // RÚBRICAS E INFORMES
@@ -1863,38 +1960,52 @@ async function genInfGrupo() {
 // =====================================================
 // MATEMÁTICAS
 // =====================================================
-async function genMates() {
-  var bloques = Array.from(document.querySelectorAll('#bloq .tag.on')).map(function(b) { return b.textContent; }).join(', ');
-  if (!bloques) { alert('Selecciona al menos un bloque temático.'); return; }
-  var fmts = Array.from(document.querySelectorAll('#fmt .tag.on')).map(function(b) { return b.textContent; }).join(', ');
+function genMates() {
+  var bloques = Array.from(document.querySelectorAll('#bloq .tag.on')).map(function(b) { return b.textContent.trim(); });
+  if (!bloques.length) { alert('Selecciona al menos un bloque temático.'); return; }
+  var num = Math.min(parseInt(document.getElementById('m-num').value) || 8, 25);
   var curso = document.getElementById('m-curso').value;
-  var num = document.getElementById('m-num').value;
-  var extra = document.getElementById('m-extra').value;
+  // Mapear nombres de bloques a claves internas
+  var mapaB = {'Números y operaciones':'operaciones','Álgebra y expresiones':'algebra','Geometría':'geometria','Estadística y probabilidad':'estadistica','Funciones y gráficas':'funciones','Medida y magnitudes':'proporcionalidad','Problemas contextualizados':'proporcionalidad','Fracciones':'fracciones','Decimales':'decimales','Potencias y raíces':'potencias','Ecuaciones':'ecuaciones','Sistemas':'sistemas','Probabilidad':'probabilidad','Números y conjuntos':'numeros','Trigonometría':'trigonometria','Matrices':'matrices'};
+  var cursoMap = {'1º Primaria':'p3','2º Primaria':'p3','3º Primaria':'p3','4º Primaria':'p4','5º Primaria':'p5','6º Primaria':'p6','1º ESO':'e1','2º ESO':'e2','3º ESO':'e3','4º ESO':'e4','1º Bachillerato':'b1','2º Bachillerato':'b2'};
+  var cursoKey = cursoMap[curso] || 'e1';
+  temasSel = bloques.map(function(b){return mapaB[b]||'operaciones'}).filter(function(t,i,a){return a.indexOf(t)===i});
+  nivel = nivelMat;
   document.getElementById('m-badge').textContent = 'Nivel ' + nivelMat + ' · ' + curso + ' · ' + num + ' ejercicios';
   showSp('sp-m'); hideR('rw-m');
-  var t = await claude(
-    'Genera ' + num + ' ejercicios de matemáticas para ' + curso + '. Nivel: ' + nivelMat +
-    '. Bloques temáticos: ' + bloques + '. Formato: ' + fmts + '.' +
-    (extra ? ' Instrucciones adicionales: ' + extra + '.' : '') +
-    '\n\nNumera cada ejercicio. Usa notación matemática clara y adaptada al nivel. Adapta el lenguaje y complejidad exactamente al nivel indicado. Si hay soluciones, ponlas al final en sección SOLUCIONES. Sigue el currículo LOMLOE español.',
-    'Eres un profesor de matemáticas español especializado en crear ejercicios adaptados al nivel del alumno. Sigue el currículo LOMLOE. Responde en español con notación matemática clara.'
-  );
-  hideSp('sp-m'); showR('rw-m', 'r-m', t);
+  var ejs = generarEjercicios();
+  if (!ejs) { hideSp('sp-m'); return; }
+  var fmt = document.getElementById('formato') ? (document.getElementById('formato') ? document.getElementById('formato').value : 'opcion') : 'opcion';
+  var html = ejs.map(function(e,i){ return renderEj(e,i+1,false,'A'); }).join('');
+  document.getElementById('r-m').innerHTML = html;
+  hideSp('sp-m');
+  document.getElementById('rw-m').classList.add('show');
 }
 
-async function genMatesAB() {
-  var bloques = Array.from(document.querySelectorAll('#bloq .tag.on')).map(function(b) { return b.textContent; }).join(', ');
-  if (!bloques) { alert('Selecciona al menos un bloque temático.'); return; }
+function genMatesAB() {
+  var bloques = Array.from(document.querySelectorAll('#bloq .tag.on')).map(function(b) { return b.textContent.trim(); });
+  if (!bloques.length) { alert('Selecciona al menos un bloque temático.'); return; }
   var curso = document.getElementById('m-curso').value;
-  var num = document.getElementById('m-num').value;
+  var num = Math.min(parseInt(document.getElementById('m-num').value) || 8, 25);
+  var mapaB = {'Números y operaciones':'operaciones','Álgebra y expresiones':'algebra','Geometría':'geometria','Estadística y probabilidad':'estadistica','Funciones y gráficas':'funciones','Medida y magnitudes':'proporcionalidad','Problemas contextualizados':'proporcionalidad','Fracciones':'fracciones','Decimales':'decimales','Potencias y raíces':'potencias','Ecuaciones':'ecuaciones','Sistemas':'sistemas','Probabilidad':'probabilidad','Números y conjuntos':'numeros','Trigonometría':'trigonometria','Matrices':'matrices'};
+  temasSel = bloques.map(function(b){return mapaB[b]||'operaciones'}).filter(function(t,i,a){return a.indexOf(t)===i});
+  nivel = nivelMat;
   document.getElementById('m-badge').textContent = 'Variante A/B · Nivel ' + nivelMat + ' · ' + curso;
   showSp('sp-m'); hideR('rw-m');
-  var t = await claude(
-    'Genera ' + num + ' ejercicios de matemáticas para ' + curso + ' en DOS VARIANTES A y B. Nivel: ' + nivelMat + '. Bloques: ' + bloques + '.' +
-    '\n\nMisma dificultad y estructura pero con números y datos diferentes para evitar copias en clase.\n\nFormato exacto:\n--- VARIANTE A ---\n(ejercicios)\n--- VARIANTE B ---\n(ejercicios)\n--- SOLUCIONES A ---\n--- SOLUCIONES B ---\n\nSigue el currículo LOMLOE.',
-    'Eres un profesor de matemáticas español. Crea variantes A/B con misma dificultad pero datos distintos. Sigue la LOMLOE. Responde en español.'
-  );
-  hideSp('sp-m'); showR('rw-m', 'r-m', t);
+  var ejsA = generarEjercicios();
+  var ejsB = generarEjercicios();
+  if (!ejsA || !ejsB) { hideSp('sp-m'); return; }
+  var htmlA = '<div style="font-size:.78rem;font-weight:700;letter-spacing:.08em;color:var(--primary-hi);margin-bottom:10px;text-transform:uppercase">— Variante A —</div>';
+  htmlA += ejsA.map(function(e,i){ return renderEj(e,i+1,false,'A'); }).join('');
+  var htmlB = '<div style="font-size:.78rem;font-weight:700;letter-spacing:.08em;color:var(--teal-hi);margin:16px 0 10px;text-transform:uppercase">— Variante B —</div>';
+  htmlB += ejsB.map(function(e,i){ return renderEj(e,i+1,false,'B'); }).join('');
+  var htmlSolA = '<div style="font-size:.78rem;font-weight:700;letter-spacing:.08em;color:var(--primary-hi);margin:16px 0 10px;text-transform:uppercase">— Soluciones Variante A —</div>';
+  htmlSolA += ejsA.map(function(e,i){ return renderEj(e,i+1,true,'SA'); }).join('');
+  var htmlSolB = '<div style="font-size:.78rem;font-weight:700;letter-spacing:.08em;color:var(--teal-hi);margin:16px 0 10px;text-transform:uppercase">— Soluciones Variante B —</div>';
+  htmlSolB += ejsB.map(function(e,i){ return renderEj(e,i+1,true,'SB'); }).join('');
+  document.getElementById('r-m').innerHTML = htmlA + htmlB + htmlSolA + htmlSolB;
+  hideSp('sp-m');
+  document.getElementById('rw-m').classList.add('show');
 }
 
 // =====================================================
@@ -1936,6 +2047,1604 @@ function quickFam(i) {
 // INIT
 // =====================================================
 render();
+
+
+// ═══════════════════════════════════════
+// MOTOR MATEMÁTICAS ADAPTATIVAS (sin API)
+// ═══════════════════════════════════════
+function rnd(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+function rndDec(a, b, dec) { return Math.round((Math.random() * (b - a) + a) * Math.pow(10, dec)) / Math.pow(10, dec); }
+function mcd(a, b) { a = Math.abs(a); b = Math.abs(b); while(b) { var t = b; b = a % b; a = t; } return a; }
+function simplificarFrac(n, d) { var g = mcd(Math.abs(n), Math.abs(d)); return [n/g, d/g]; }
+function esPrimo(n) { if(n < 2) return false; for(var i = 2; i <= Math.sqrt(n); i++) if(n % i === 0) return false; return true; }
+function factoresPrimos(n) { var f = []; var d = 2; while(d * d <= n) { while(n % d === 0) { f.push(d); n = Math.floor(n / d); } d++; } if(n > 1) f.push(n); return f; }
+function shuffle(arr) { var a = arr.slice(); for(var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i+1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function opciones4(correcta, generarOpciones) {
+  var ops = generarOpciones ? generarOpciones() : [];
+  var set = new Set(ops.map(String));
+  set.add(String(correcta));
+  var arr = Array.from(set).slice(0, 4);
+  while(arr.length < 4) {
+    var v = correcta + rnd(-10, 10);
+    if(v !== correcta && !set.has(String(v))) { arr.push(String(v)); set.add(String(v)); }
+  }
+  return shuffle(arr.slice(0, 4));
+}
+
+// =====================================================
+// DEFINICIÓN DE TEMAS POR CURSO
+// =====================================================
+var TEMAS = {
+  operaciones: {
+    nombre: 'Operaciones', icono: 'plus',
+    cursos: ['p3','p4','p5','p6','e1','e2','e3','e4','b1','b2']
+  },
+  fracciones: {
+    nombre: 'Fracciones', icono: 'divide',
+    cursos: ['p4','p5','p6','e1','e2','e3','e4']
+  },
+  decimales: {
+    nombre: 'Decimales', icono: 'decimal',
+    cursos: ['p4','p5','p6','e1','e2']
+  },
+  potencias: {
+    nombre: 'Potencias y raíces', icono: 'power',
+    cursos: ['p6','e1','e2','e3','e4','b1','b2']
+  },
+  algebra: {
+    nombre: 'Álgebra', icono: 'algebra',
+    cursos: ['e1','e2','e3','e4','b1','b2']
+  },
+  ecuaciones: {
+    nombre: 'Ecuaciones', icono: 'equal',
+    cursos: ['e1','e2','e3','e4','b1','b2']
+  },
+  sistemas: {
+    nombre: 'Sistemas', icono: 'systems',
+    cursos: ['e3','e4','b1','b2']
+  },
+  geometria: {
+    nombre: 'Geometría', icono: 'geo',
+    cursos: ['p3','p4','p5','p6','e1','e2','e3','e4','b1']
+  },
+  estadistica: {
+    nombre: 'Estadística', icono: 'stats',
+    cursos: ['p5','p6','e1','e2','e3','e4','b1','b2']
+  },
+  funciones: {
+    nombre: 'Funciones', icono: 'func',
+    cursos: ['e3','e4','b1','b2']
+  },
+  proporcionalidad: {
+    nombre: 'Proporcionalidad', icono: 'prop',
+    cursos: ['p5','p6','e1','e2','e3']
+  },
+  probabilidad: {
+    nombre: 'Probabilidad', icono: 'prob',
+    cursos: ['e2','e3','e4','b1','b2']
+  },
+  numeros: {
+    nombre: 'Números y conjuntos', icono: 'num',
+    cursos: ['p3','p4','p5','p6','e1','e2']
+  },
+  trigonometria: {
+    nombre: 'Trigonometría', icono: 'trig',
+    cursos: ['e4','b1','b2']
+  },
+  matrices: {
+    nombre: 'Matrices', icono: 'matrix',
+    cursos: ['b1','b2']
+  }
+};
+
+var ICONOS_SVG = {
+  plus: '<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  divide: '<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><circle cx="12" cy="5" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>',
+  decimal: '<svg viewBox="0 0 24 24"><path d="M4 20h16M4 4l8 16"/><circle cx="18" cy="18" r="1.5" fill="currentColor" stroke="none"/></svg>',
+  power: '<svg viewBox="0 0 24 24"><path d="M12 2v4M4.93 4.93l2.83 2.83M2 12h4M4.93 19.07l2.83-2.83M12 22v-4M19.07 19.07l-2.83-2.83M22 12h-4M19.07 4.93l-2.83 2.83"/></svg>',
+  algebra: '<svg viewBox="0 0 24 24"><path d="M4 20l8-16M20 20l-8-16M4 12h16"/></svg>',
+  equal: '<svg viewBox="0 0 24 24"><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/></svg>',
+  systems: '<svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h12M3 18h6"/></svg>',
+  geo: '<svg viewBox="0 0 24 24"><polygon points="12 2 22 20 2 20"/></svg>',
+  stats: '<svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+  func: '<svg viewBox="0 0 24 24"><path d="M3 12c1-4 3-6 6-6s4 8 6 8 4-4 6-4"/></svg>',
+  prop: '<svg viewBox="0 0 24 24"><circle cx="9" cy="12" r="4"/><circle cx="18" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><line x1="12" y1="10" x2="15.5" y2="7.5"/><line x1="12" y1="14" x2="15.5" y2="16.5"/></svg>',
+  prob: '<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 2v10h10"/></svg>',
+  num: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>',
+  trig: '<svg viewBox="0 0 24 24"><path d="M2 20l10-16 10 16H2z"/><line x1="12" y1="4" x2="12" y2="20"/></svg>',
+  matrix: '<svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="4" y2="18"/><line x1="20" y1="6" x2="20" y2="18"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="18" x2="16" y2="18"/></svg>'
+};
+
+// =====================================================
+// GENERADORES POR TEMA
+// =====================================================
+
+function genOperaciones(nivel, curso) {
+  var ejs = [];
+  var n = nivel === 'basico' ? [1,20] : nivel === 'medio' ? [10,100] : [50,999];
+
+  // Suma y resta
+  ejs.push(function() {
+    var a = rnd(n[0], n[1]), b = rnd(n[0], n[1]);
+    var op = rnd(0,1) ? '+' : '-';
+    var c = op === '+' ? a + b : a - b;
+    var texto = a + ' ' + op + ' ' + b + ' = ?';
+    return { texto, sol: c, tipo: 'Operación básica',
+      pasos: [a + ' ' + op + ' ' + b + ' = ' + c],
+      distractores: function() { return [c + rnd(1,5), c - rnd(1,5), c + rnd(6,12)].map(String); }
+    };
+  });
+
+  // Multiplicación
+  ejs.push(function() {
+    var r = nivel === 'basico' ? [2,9] : nivel === 'medio' ? [2,20] : [10,50];
+    var a = rnd(r[0], r[1]), b = rnd(r[0], r[1]);
+    var c = a * b;
+    return { texto: a + ' × ' + b + ' = ?', sol: c, tipo: 'Multiplicación',
+      pasos: [a + ' × ' + b + ' = ' + c],
+      distractores: function() { return [a*(b+1), a*(b-1), (a+1)*b].map(String); }
+    };
+  });
+
+  // División
+  ejs.push(function() {
+    var div = rnd(2, nivel === 'basico' ? 9 : nivel === 'medio' ? 15 : 25);
+    var res = rnd(2, nivel === 'basico' ? 9 : 20);
+    var num = div * res;
+    return { texto: num + ' ÷ ' + div + ' = ?', sol: res, tipo: 'División',
+      pasos: [num + ' ÷ ' + div + ' = ' + res + ' (comprueba: ' + div + ' × ' + res + ' = ' + num + ')'],
+      distractores: function() { return [res+1, res-1, res+2].map(String); }
+    };
+  });
+
+  if (nivel !== 'basico') {
+    // Jerarquía de operaciones
+    ejs.push(function() {
+      var a = rnd(2,10), b = rnd(2,8), c = rnd(1,6);
+      var sol = a + b * c;
+      return {
+        texto: a + ' + ' + b + ' × ' + c + ' = ?',
+        sol, tipo: 'Jerarquía de operaciones',
+        pasos: ['Primero la multiplicación: ' + b + ' × ' + c + ' = ' + (b*c), 'Luego la suma: ' + a + ' + ' + (b*c) + ' = ' + sol],
+        distractores: function() { return [(a+b)*c, a*b+c, (a+b+c)].map(String); }
+      };
+    });
+  }
+
+  if (nivel === 'avanzado') {
+    ejs.push(function() {
+      var a = rnd(2,8), b = rnd(2,6), c = rnd(1,5), d = rnd(1,4);
+      var sol = a * b - c * d;
+      return {
+        texto: a + ' × ' + b + ' − ' + c + ' × ' + d + ' = ?',
+        sol, tipo: 'Jerarquía avanzada',
+        pasos: [a + ' × ' + b + ' = ' + (a*b), c + ' × ' + d + ' = ' + (c*d), (a*b) + ' − ' + (c*d) + ' = ' + sol],
+        distractores: function() { return [sol+3, sol-2, sol+5].map(String); }
+      };
+    });
+  }
+
+  return shuffle(ejs);
+}
+
+function genFracciones(nivel, curso) {
+  var ejs = [];
+
+  ejs.push(function() {
+    var d = rnd(2,12), n1 = rnd(1,d-1), n2 = rnd(1,d-1);
+    var ns = n1+n2, ds = d;
+    var sf = simplificarFrac(ns, ds);
+    var textoSol = sf[1] === 1 ? String(sf[0]) : sf[0] + '/' + sf[1];
+    var textoFull = ns !== sf[0] ? ns + '/' + ds + ' = ' + sf[0] + '/' + sf[1] : ns + '/' + ds;
+    return {
+      texto: frac(n1,d) + ' + ' + frac(n2,d) + ' = ?',
+      sol: textoSol, tipo: 'Suma de fracciones (igual denominador)',
+      pasos: ['Suma numeradores: ' + n1 + ' + ' + n2 + ' = ' + ns, 'Resultado: ' + textoFull, ns !== sf[0] ? 'Simplificado: ' + sf[0] + '/' + sf[1] : ''],
+      distractores: function() {
+        return [frac(n1+n2,d*2), frac(n1+n2+1,d), frac(n1+n2-1,d)];
+      }
+    };
+  });
+
+  ejs.push(function() {
+    var d1 = rnd(2,6), d2 = rnd(2,6);
+    while(d1 === d2) d2 = rnd(2,6);
+    var n1 = rnd(1,d1), n2 = rnd(1,d2);
+    var mcm = d1 * d2 / mcd(d1,d2);
+    var ns = (n1 * (mcm/d1)) + (n2 * (mcm/d2));
+    var sf = simplificarFrac(ns, mcm);
+    var textoSol = sf[1] === 1 ? String(sf[0]) : sf[0] + '/' + sf[1];
+    return {
+      texto: frac(n1,d1) + ' + ' + frac(n2,d2) + ' = ?',
+      sol: textoSol, tipo: 'Suma de fracciones (distinto denominador)',
+      pasos: ['MCM(' + d1 + ',' + d2 + ') = ' + mcm, 'Ampliar: ' + (n1*(mcm/d1)) + '/' + mcm + ' + ' + (n2*(mcm/d2)) + '/' + mcm, 'Suma: ' + ns + '/' + mcm, sf[0] !== ns ? 'Simplificar: ' + sf[0] + '/' + sf[1] : 'Ya simplificado'],
+      distractores: function() { return [frac(n1+n2,d1+d2), frac(ns+1,mcm), frac(ns-1,mcm)]; }
+    };
+  });
+
+  ejs.push(function() {
+    var d1 = rnd(2,6), d2 = rnd(2,6);
+    var n1 = rnd(1,d1), n2 = rnd(1,d2);
+    var nr = n1 * n2, dr = d1 * d2;
+    var sf = simplificarFrac(nr, dr);
+    var sol = sf[1] === 1 ? String(sf[0]) : sf[0] + '/' + sf[1];
+    return {
+      texto: frac(n1,d1) + ' × ' + frac(n2,d2) + ' = ?',
+      sol, tipo: 'Multiplicación de fracciones',
+      pasos: ['Multiplica numeradores: ' + n1 + ' × ' + n2 + ' = ' + nr, 'Multiplica denominadores: ' + d1 + ' × ' + d2 + ' = ' + dr, nr !== sf[0] ? 'Simplifica ' + nr + '/' + dr + ' = ' + sf[0] + '/' + sf[1] : ''],
+      distractores: function() { return [frac(n1*n2+1,d1*d2), frac(n1+n2,d1+d2), frac(n1*n2-1,d1*d2)]; }
+    };
+  });
+
+  if (nivel !== 'basico') {
+    ejs.push(function() {
+      var d1=rnd(2,6), d2=rnd(2,6), n1=rnd(1,d1-1), n2=rnd(1,d2-1);
+      var nr = n1*d2, dr = d1*n2;
+      var sf = simplificarFrac(nr,dr);
+      var sol = sf[1] === 1 ? String(sf[0]) : sf[0]+'/'+sf[1];
+      return {
+        texto: frac(n1,d1) + ' ÷ ' + frac(n2,d2) + ' = ?',
+        sol, tipo: 'División de fracciones',
+        pasos: ['Invertir la segunda fracción: ' + frac(n2,d2) + ' → ' + frac(d2,n2), 'Multiplicar: ' + frac(n1,d1) + ' × ' + frac(d2,n2) + ' = ' + frac(nr,dr), sf[0] !== nr ? 'Simplificar: ' + sf[0]+'/'+sf[1] : ''],
+        distractores: function() { return [frac(n1*d2+1,d1*n2), frac(n1*n2,d1*d2), frac(nr+2,dr)]; }
+      };
+    });
+  }
+
+  return shuffle(ejs);
+}
+
+function genEcuaciones(nivel, curso) {
+  var ejs = [];
+
+  ejs.push(function() {
+    var a = rnd(1, nivel==='basico'?5:nivel==='medio'?10:20);
+    var b = rnd(1, nivel==='basico'?15:30);
+    var sol = b;
+    return {
+      texto: 'x + ' + a + ' = ' + (a + b),
+      sol: 'x = ' + sol, tipo: 'Ecuación de 1er grado',
+      pasos: ['x + ' + a + ' = ' + (a+b), 'x = ' + (a+b) + ' − ' + a, 'x = ' + sol],
+      distractores: function() { return ['x = '+(sol+1), 'x = '+(sol-1), 'x = '+(sol+2)]; }
+    };
+  });
+
+  ejs.push(function() {
+    var a = rnd(2, nivel==='basico'?5:nivel==='medio'?9:15);
+    var sol = rnd(1, nivel==='basico'?8:15);
+    var b = a * sol;
+    return {
+      texto: a + 'x = ' + b,
+      sol: 'x = ' + sol, tipo: 'Ecuación multiplicativa',
+      pasos: [a + 'x = ' + b, 'x = ' + b + ' ÷ ' + a, 'x = ' + sol],
+      distractores: function() { return ['x = '+(sol+1), 'x = '+(sol-1), 'x = '+(sol+3)]; }
+    };
+  });
+
+  if (nivel !== 'basico') {
+    ejs.push(function() {
+      var a = rnd(2,8), b = rnd(1,10), sol = rnd(1,10);
+      var c = a * sol + b;
+      return {
+        texto: a + 'x + ' + b + ' = ' + c,
+        sol: 'x = ' + sol, tipo: 'Ecuación de 1er grado completa',
+        pasos: [a+'x + '+b+' = '+c, a+'x = '+c+' − '+b+' = '+(c-b), 'x = '+(c-b)+' ÷ '+a+' = '+sol],
+        distractores: function() { return ['x = '+(sol+1), 'x = '+(sol-1), 'x = '+(sol+2)]; }
+      };
+    });
+
+    ejs.push(function() {
+      var sol = rnd(-5,10);
+      var a = rnd(2,6), b = rnd(1,8), c = rnd(2,5), d = rnd(1,6);
+      var lhs = a*sol + b;
+      var rhs = c*sol + d;
+      var diff_a = a - c;
+      var diff_b = d - b;
+      return {
+        texto: a + 'x + ' + b + ' = ' + c + 'x + ' + d,
+        sol: 'x = ' + sol, tipo: 'Ecuación con incógnita en ambos miembros',
+        pasos: [a+'x − '+c+'x = '+d+' − '+b, diff_a+'x = '+diff_b, 'x = '+diff_b+' ÷ '+diff_a+' = '+sol],
+        distractores: function() { return ['x = '+(sol+1), 'x = '+(sol-1), 'x = '+(sol*2)]; }
+      };
+    });
+  }
+
+  if (nivel === 'avanzado') {
+    ejs.push(function() {
+      var sol1 = rnd(-3,5), sol2 = rnd(-3,5);
+      while(sol1 === sol2) sol2 = rnd(-3,5);
+      var b = -(sol1+sol2), c = sol1*sol2;
+      var sign_b = b >= 0 ? '+' : '';
+      var sign_c = c >= 0 ? '+' : '';
+      return {
+        texto: 'x² ' + sign_b + b + 'x ' + sign_c + c + ' = 0',
+        sol: 'x₁ = ' + sol1 + ', x₂ = ' + sol2,
+        tipo: 'Ecuación de 2º grado',
+        pasos: ['Buscar dos números cuya suma sea '+(-b)+' y cuyo producto sea '+c, 'Esos números son: '+sol1+' y '+sol2, 'x₁ = '+sol1+', x₂ = '+sol2],
+        distractores: function() { return ['x = '+sol1+' y '+sol2, 'x₁ = '+sol2+', x₂ = '+(-sol1), 'x₁ = '+(sol1+1)+', x₂ = '+sol2]; }
+      };
+    });
+  }
+
+  return shuffle(ejs);
+}
+
+function genGeometria(nivel, curso) {
+  var ejs = [];
+
+  ejs.push(function() {
+    var b = rnd(2, nivel==='basico'?10:20), h = rnd(2, nivel==='basico'?10:20);
+    var sol = b * h;
+    return {
+      texto: 'Calcula el área de un rectángulo de base ' + b + ' cm y altura ' + h + ' cm.',
+      sol: sol + ' cm²', tipo: 'Área del rectángulo',
+      pasos: ['A = base × altura', 'A = ' + b + ' × ' + h, 'A = ' + sol + ' cm²'],
+      distractores: function() { return [sol+b+' cm²', (b+h)+' cm²', sol+h+' cm²']; }
+    };
+  });
+
+  ejs.push(function() {
+    var b = rnd(2,15), h = rnd(2,15);
+    var sol = (b * h) / 2;
+    return {
+      texto: 'Calcula el área de un triángulo de base ' + b + ' cm y altura ' + h + ' cm.',
+      sol: sol + ' cm²', tipo: 'Área del triángulo',
+      pasos: ['A = (base × altura) / 2', 'A = (' + b + ' × ' + h + ') / 2', 'A = ' + (b*h) + ' / 2 = ' + sol + ' cm²'],
+      distractores: function() { return [(b*h)+' cm²', (sol+b)+' cm²', (sol+h)+' cm²']; }
+    };
+  });
+
+  ejs.push(function() {
+    var r = rnd(1, nivel==='basico'?8:15);
+    var area = Math.round(Math.PI * r * r * 100) / 100;
+    var circ = Math.round(2 * Math.PI * r * 100) / 100;
+    return {
+      texto: rnd(0,1) ? 'Calcula el área de una circunferencia de radio ' + r + ' cm. (Usa π ≈ 3.14)' : 'Calcula el perímetro de una circunferencia de radio ' + r + ' cm. (Usa π ≈ 3.14)',
+      sol: rnd(0,1) ? (Math.round(3.14 * r * r * 100)/100) + ' cm²' : (Math.round(2 * 3.14 * r * 100)/100) + ' cm',
+      tipo: 'Circunferencia',
+      pasos: ['A = π × r²  ó  P = 2 × π × r', 'Sustituir con π = 3.14 y r = ' + r],
+      distractores: function() { return [(area+2)+' cm²', (area-1)+' cm²', (circ+1)+' cm']; }
+    };
+  });
+
+  if (nivel !== 'basico') {
+    ejs.push(function() {
+      var a = rnd(3,12), b = rnd(3,12);
+      var c = Math.sqrt(a*a + b*b);
+      var cs = Math.round(c * 100) / 100;
+      return {
+        texto: 'Calcula la hipotenusa de un triángulo rectángulo con catetos ' + a + ' cm y ' + b + ' cm.',
+        sol: cs + ' cm', tipo: 'Teorema de Pitágoras',
+        pasos: ['c² = a² + b²', 'c² = ' + a + '² + ' + b + '² = ' + (a*a) + ' + ' + (b*b) + ' = ' + (a*a+b*b), 'c = √' + (a*a+b*b) + ' ≈ ' + cs + ' cm'],
+        distractores: function() { return [(a+b)+' cm', Math.round((a*a+b*b)*100)/100+' cm', (cs+1)+' cm']; }
+      };
+    });
+
+    ejs.push(function() {
+      var l = rnd(2,10), h = rnd(2,10), w = rnd(2,10);
+      var vol = l * h * w;
+      return {
+        texto: 'Calcula el volumen de un paralelepípedo de ' + l + '×' + h + '×' + w + ' cm.',
+        sol: vol + ' cm³', tipo: 'Volumen',
+        pasos: ['V = largo × alto × ancho', 'V = ' + l + ' × ' + h + ' × ' + w, 'V = ' + vol + ' cm³'],
+        distractores: function() { return [(vol+10)+' cm³', (2*(l*h+l*w+h*w))+' cm²', (vol-5)+' cm³']; }
+      };
+    });
+  }
+
+  return shuffle(ejs);
+}
+
+function genEstadistica(nivel, curso) {
+  var ejs = [];
+
+  ejs.push(function() {
+    var n = rnd(4, nivel==='basico'?6:nivel==='medio'?8:10);
+    var datos = Array.from({length: n}, function() { return rnd(nivel==='basico'?1:nivel==='medio'?5:10, nivel==='basico'?20:nivel==='medio'?50:100); });
+    var suma = datos.reduce(function(s,x){return s+x}, 0);
+    var media = Math.round(suma / n * 100) / 100;
+    return {
+      texto: 'Calcula la media aritmética de: ' + datos.join(', '),
+      sol: String(media), tipo: 'Media aritmética',
+      pasos: ['Suma todos los valores: ' + datos.join(' + ') + ' = ' + suma, 'Divide entre la cantidad (' + n + '): ' + suma + ' ÷ ' + n + ' = ' + media],
+      distractores: function() { return [String(media+1), String(media-0.5), String(Math.round(suma/2*100)/100)]; }
+    };
+  });
+
+  ejs.push(function() {
+    var n = rnd(5,9);
+    var datos = Array.from({length: n}, function() { return rnd(1,20); }).sort(function(a,b){return a-b});
+    var mediana = n % 2 === 1 ? datos[Math.floor(n/2)] : (datos[n/2-1] + datos[n/2]) / 2;
+    return {
+      texto: 'Halla la mediana de: ' + datos.join(', '),
+      sol: String(mediana), tipo: 'Mediana',
+      pasos: ['Datos ya ordenados: ' + datos.join(', '), n%2===1 ? 'Posición central: ' + (Math.floor(n/2)+1) + 'º dato = ' + mediana : 'Promedio de los dos centrales: (' + datos[n/2-1] + '+' + datos[n/2] + ')/2 = ' + mediana],
+      distractores: function() { return [String(mediana+1), String(datos[0]), String(datos[n-1])]; }
+    };
+  });
+
+  if (nivel !== 'basico') {
+    ejs.push(function() {
+      var n = rnd(5,8);
+      var datos = Array.from({length: n}, function() { return rnd(1,15); });
+      var conteo = {};
+      datos.forEach(function(x){ conteo[x] = (conteo[x]||0)+1; });
+      var maxFreq = Math.max.apply(null, Object.values(conteo));
+      var moda = Object.keys(conteo).filter(function(k){ return conteo[k]===maxFreq; }).join(' y ');
+      return {
+        texto: 'Determina la moda de: ' + datos.join(', '),
+        sol: moda, tipo: 'Moda',
+        pasos: ['Contar las repeticiones de cada valor', 'El valor que más se repite (' + maxFreq + ' veces) es: ' + moda],
+        distractores: function() {
+          var vals = Object.keys(conteo).filter(function(k){return k!==moda});
+          return [vals[0]||String(parseInt(moda)+1), String(parseInt(moda)+2), String(parseInt(moda)-1)];
+        }
+      };
+    });
+  }
+
+  return shuffle(ejs);
+}
+
+function genAlgebra(nivel, curso) {
+  var ejs = [];
+
+  ejs.push(function() {
+    var a = rnd(1,8), b = rnd(1,8), x = rnd(1,6);
+    var sol = a*x + b;
+    return {
+      texto: 'Si a = ' + a + ' y b = ' + b + ', calcula: ' + a + 'a + b cuando a = ' + x,
+      sol: String(sol), tipo: 'Evaluación de expresiones',
+      pasos: ['Sustituir a = ' + x + ' en ' + a + 'a + ' + b, a + ' × ' + x + ' + ' + b + ' = ' + (a*x) + ' + ' + b + ' = ' + sol],
+      distractores: function() { return [String(sol+1), String(sol-1), String(sol+a)]; }
+    };
+  });
+
+  ejs.push(function() {
+    var a = rnd(2,8), b = rnd(1,6), c = rnd(2,8), d = rnd(1,6);
+    var sa = a+c, sb = b+d;
+    var txt = (sa===1?'':sa) + 'x + ' + sb;
+    return {
+      texto: 'Simplifica: ' + a + 'x + ' + b + ' + ' + c + 'x + ' + d,
+      sol: txt, tipo: 'Reducción de términos semejantes',
+      pasos: ['Agrupar términos con x: ' + a + 'x + ' + c + 'x = ' + sa + 'x', 'Agrupar números: ' + b + ' + ' + d + ' = ' + sb, 'Resultado: ' + txt],
+      distractores: function() { return [(sa+1)+'x + '+sb, sa+'x + '+(sb+1), (a*c)+'x + '+(b*d)]; }
+    };
+  });
+
+  if (nivel !== 'basico') {
+    ejs.push(function() {
+      var a = rnd(2,8), b = rnd(1,6);
+      var c = rnd(2,5);
+      var ra = a*c, rb = b*c;
+      return {
+        texto: 'Desarrolla: ' + c + '(' + a + 'x + ' + b + ')',
+        sol: ra + 'x + ' + rb, tipo: 'Propiedad distributiva',
+        pasos: [c + ' × ' + a + 'x = ' + ra + 'x', c + ' × ' + b + ' = ' + rb, 'Resultado: ' + ra + 'x + ' + rb],
+        distractores: function() { return [(ra+1)+'x + '+rb, ra+'x + '+(rb+c), (ra-1)+'x + '+rb]; }
+      };
+    });
+  }
+
+  return shuffle(ejs);
+}
+
+function genPotencias(nivel, curso) {
+  var ejs = [];
+
+  ejs.push(function() {
+    var base = rnd(2, nivel==='basico'?5:nivel==='medio'?8:12);
+    var exp = rnd(2, nivel==='basico'?3:nivel==='medio'?4:5);
+    var sol = Math.pow(base, exp);
+    return {
+      texto: base + '^' + exp + ' = ?',
+      sol: String(sol), tipo: 'Potenciación',
+      pasos: [base + '^' + exp + ' = ' + Array(exp).fill(base).join(' × '), '= ' + sol],
+      distractores: function() { return [String(sol+base), String(base*exp), String(sol-base)]; }
+    };
+  });
+
+  ejs.push(function() {
+    var n = nivel==='basico'?[4,9,16,25,36,49,64,81,100]:nivel==='medio'?[4,9,16,25,36,49,64,81,100,121,144,169,196,225]:
+    [4,9,16,25,36,49,64,81,100,121,144,169,196,225,256,289,324,361,400,484,529,625];
+    var s2 = n[rnd(0,n.length-1)];
+    var sol = Math.sqrt(s2);
+    return {
+      texto: '√' + s2 + ' = ?',
+      sol: String(sol), tipo: 'Raíz cuadrada exacta',
+      pasos: ['¿Qué número multiplicado por sí mismo da ' + s2 + '?', sol + ' × ' + sol + ' = ' + s2],
+      distractores: function() { return [String(sol+1), String(sol-1), String(sol+2)]; }
+    };
+  });
+
+  if (nivel !== 'basico') {
+    ejs.push(function() {
+      var b = rnd(2,5), e1 = rnd(1,4), e2 = rnd(1,4);
+      var sol = Math.pow(b, e1+e2);
+      return {
+        texto: b + '^' + e1 + ' × ' + b + '^' + e2 + ' = ?',
+        sol: b + '^' + (e1+e2) + ' = ' + sol, tipo: 'Producto de potencias (misma base)',
+        pasos: ['Cuando la base es igual: sumar exponentes', b + '^(' + e1 + '+' + e2 + ') = ' + b + '^' + (e1+e2), '= ' + sol],
+        distractores: function() { return [b+'^'+(e1*e2), b+'^'+(e1+e2+1), b+'^'+(e1+e2-1)]; }
+      };
+    });
+  }
+
+  return shuffle(ejs);
+}
+
+function genProporcionalidad(nivel, curso) {
+  var ejs = [];
+
+  ejs.push(function() {
+    var a = rnd(2,10), b = rnd(2,8), k = rnd(2,6);
+    var sol = b * k;
+    return {
+      texto: 'Si ' + a + ' kg cuestan ' + (a*k) + '€, ¿cuánto cuestan ' + b + ' kg?',
+      sol: sol + '€', tipo: 'Regla de tres directa',
+      pasos: ['Relación: ' + a + ' kg → ' + (a*k) + '€', 'Precio por kg: ' + (a*k) + ' ÷ ' + a + ' = ' + k + '€/kg', b + ' kg × ' + k + '€/kg = ' + sol + '€'],
+      distractores: function() { return [(sol+k)+'€', (sol-k)+'€', (a*k+b)+'€']; }
+    };
+  });
+
+  ejs.push(function() {
+    var obreros = rnd(3,8), dias = rnd(4,10);
+    var total = obreros * dias;
+    var nuevosObreros = rnd(2, obreros-1);
+    var sol = Math.round(total / nuevosObreros);
+    return {
+      texto: nuevosObreros + ' obreros tardan en terminar una obra lo que ' + obreros + ' obreros en ' + dias + ' días. ¿Cuántos días tardan los ' + nuevosObreros + ' obreros?',
+      sol: sol + ' días', tipo: 'Regla de tres inversa',
+      pasos: ['Trabajo total: ' + obreros + ' × ' + dias + ' = ' + total + ' días-obrero', 'Con ' + nuevosObreros + ' obreros: ' + total + ' ÷ ' + nuevosObreros + ' = ' + sol + ' días'],
+      distractores: function() { return [(sol+2)+' días', (sol-1)+' días', (obreros*dias/2)+' días']; }
+    };
+  });
+
+  return shuffle(ejs);
+}
+
+function genDecimales(nivel, curso) {
+  var ejs = [];
+
+  ejs.push(function() {
+    var a = rndDec(0.5,9.9,1), b = rndDec(0.5,9.9,1);
+    var sol = Math.round((a+b)*100)/100;
+    return {
+      texto: a + ' + ' + b + ' = ?',
+      sol: String(sol), tipo: 'Suma de decimales',
+      pasos: ['Alinear la coma decimal', a + ' + ' + b + ' = ' + sol],
+      distractores: function() { return [String(sol+0.1), String(sol-0.1), String(Math.round(a*b*100)/100)]; }
+    };
+  });
+
+  ejs.push(function() {
+    var a = rndDec(1,9,1), b = rnd(2,9);
+    var sol = Math.round(a*b*100)/100;
+    return {
+      texto: a + ' × ' + b + ' = ?',
+      sol: String(sol), tipo: 'Multiplicación con decimales',
+      pasos: ['Multiplicar como enteros: ' + (a*10) + ' × ' + b + ' = ' + (a*10*b), 'Mover la coma 1 lugar: ' + sol],
+      distractores: function() { return [String(sol+0.5), String(Math.round(a*10*b)), String(sol-0.2)]; }
+    };
+  });
+
+  return shuffle(ejs);
+}
+
+function genSistemas(nivel, curso) {
+  var ejs = [];
+
+  ejs.push(function() {
+    var x = rnd(1,6), y = rnd(1,6);
+    var a1 = rnd(1,4), b1 = rnd(1,4);
+    var a2 = rnd(1,4), b2 = rnd(1,4);
+    while(a1*b2 === a2*b1) { a2 = rnd(1,4); b2 = rnd(1,4); }
+    var c1 = a1*x + b1*y;
+    var c2 = a2*x + b2*y;
+    var s1 = a1===1?'':a1, s2 = b1===1?'':b1, s3 = a2===1?'':a2, s4 = b2===1?'':b2;
+    return {
+      texto: '{ ' + s1 + 'x + ' + s2 + 'y = ' + c1 + '\n{ ' + s3 + 'x + ' + s4 + 'y = ' + c2,
+      sol: 'x = ' + x + ', y = ' + y, tipo: 'Sistema de 2 ecuaciones',
+      pasos: ['Método de sustitución o eliminación', 'Solución: x = ' + x + ', y = ' + y, 'Comprueba sustituyendo en ambas ecuaciones'],
+      distractores: function() { return ['x = '+(x+1)+', y = '+y, 'x = '+x+', y = '+(y+1), 'x = '+y+', y = '+x]; }
+    };
+  });
+
+  return ejs;
+}
+
+function genProbabilidad(nivel, curso) {
+  var ejs = [];
+
+  ejs.push(function() {
+    var total = rnd(5,20);
+    var fav = rnd(1, total-1);
+    var sf = simplificarFrac(fav, total);
+    var sol = sf[0]+'/'+sf[1];
+    var pct = Math.round(fav/total*1000)/10;
+    return {
+      texto: 'En una bolsa hay ' + total + ' bolas. ' + fav + ' son rojas. ¿Cuál es la probabilidad de sacar una roja?',
+      sol: sol + ' (' + pct + '%)', tipo: 'Probabilidad clásica',
+      pasos: ['P = casos favorables / casos totales', 'P = ' + fav + '/' + total, sf[0]!==fav ? 'Simplificado: '+sol : '', 'En porcentaje: ' + pct + '%'],
+      distractores: function() { return [(fav+1)+'/'+total, fav+'/'+(total+1), sf[0]+'/'+(sf[1]+1)]; }
+    };
+  });
+
+  ejs.push(function() {
+    var total = 52;
+    var tipos = [{txt:'as',n:4},{txt:'rey',n:4},{txt:'reina',n:4},{txt:'corazón',n:13},{txt:'carta negra',n:26}];
+    var t = tipos[rnd(0,tipos.length-1)];
+    var sf = simplificarFrac(t.n, total);
+    var sol = sf[0]+'/'+sf[1];
+    return {
+      texto: 'En una baraja de 52 cartas, ¿cuál es la probabilidad de sacar un/a ' + t.txt + '?',
+      sol: sol, tipo: 'Probabilidad con baraja',
+      pasos: ['Hay ' + t.n + ' cartas de tipo "' + t.txt + '"', 'P = ' + t.n + '/52', sf[0]!==t.n ? 'Simplificado: '+sol : ''],
+      distractores: function() { return [(t.n+1)+'/52', t.n+'/51', sf[0]+'/'+(sf[1]+1)]; }
+    };
+  });
+
+  return shuffle(ejs);
+}
+
+function genNumeros(nivel, curso) {
+  var ejs = [];
+
+  ejs.push(function() {
+    var n = rnd(nivel==='basico'?10:nivel==='medio'?50:100, nivel==='basico'?50:nivel==='medio'?200:999);
+    var es = esPrimo(n);
+    return {
+      texto: '¿Es ' + n + ' un número primo?',
+      sol: es ? 'Sí, es primo' : 'No, no es primo',
+      tipo: 'Números primos',
+      pasos: es ? ['No tiene divisores entre 2 y √'+n, n + ' es primo'] :
+        ['Divisores: ' + factoresPrimos(n).join(' × '), n + ' no es primo'],
+      distractores: function() { return ['Sí, es primo', 'No, no es primo']; }
+    };
+  });
+
+  ejs.push(function() {
+    var a = rnd(nivel==='basico'?2:nivel==='medio'?10:20, nivel==='basico'?20:nivel==='medio'?60:100);
+    var b = rnd(nivel==='basico'?2:nivel==='medio'?10:20, nivel==='basico'?20:nivel==='medio'?60:100);
+    var g = mcd(a,b);
+    return {
+      texto: 'Calcula el MCD de ' + a + ' y ' + b,
+      sol: String(g), tipo: 'Máximo Común Divisor',
+      pasos: ['Descomponer: ' + a + ' = ' + factoresPrimos(a).join('×'), 'Descomponer: ' + b + ' = ' + factoresPrimos(b).join('×'), 'Factores comunes con menor exponente: MCD = ' + g],
+      distractores: function() { return [String(g+1), String(a*b/g), String(g*2)]; }
+    };
+  });
+
+  return shuffle(ejs);
+}
+
+function genTrigonometria(nivel, curso) {
+  var ejs = [];
+  var angulos = [
+    {ang:30, sin:'1/2', cos:'√3/2', tan:'1/√3 = √3/3'},
+    {ang:45, sin:'√2/2', cos:'√2/2', tan:'1'},
+    {ang:60, sin:'√3/2', cos:'1/2', tan:'√3'},
+  ];
+
+  angulos.forEach(function(a) {
+    var fn = ['sen','cos','tan'][rnd(0,2)];
+    var vals = {'sen':a.sin,'cos':a.cos,'tan':a.tan};
+    ejs.push(function() {
+      return {
+        texto: fn + '(' + a.ang + '°) = ?',
+        sol: vals[fn], tipo: 'Razones trigonométricas básicas',
+        pasos: ['Valores conocidos para ' + a.ang + '°: sen=' + a.sin + ', cos=' + a.cos + ', tan=' + a.tan, fn + '(' + a.ang + '°) = ' + vals[fn]],
+        distractores: function() { var other = Object.values(vals).filter(function(v){return v!==vals[fn]}); return other.concat(['0']); }
+      };
+    });
+  });
+
+  return shuffle(ejs);
+}
+
+function genFunciones(nivel, curso) {
+  var ejs = [];
+
+  ejs.push(function() {
+    var m = rnd(-4,4), b_val = rnd(-5,5);
+    while(m===0) m=rnd(-4,4);
+    var x = rnd(-3,5);
+    var sol = m*x + b_val;
+    var sign = b_val >= 0 ? '+' : '';
+    return {
+      texto: 'Dada f(x) = ' + (m===1?'':m===(-1)?'-':m) + 'x ' + sign + b_val + ', calcula f(' + x + ')',
+      sol: String(sol), tipo: 'Evaluación de función lineal',
+      pasos: ['Sustituir x = ' + x, 'f(' + x + ') = ' + m + ' × ' + x + ' + (' + b_val + ')', '= ' + (m*x) + ' + ' + b_val + ' = ' + sol],
+      distractores: function() { return [String(sol+1), String(sol-1), String(sol+m)]; }
+    };
+  });
+
+  ejs.push(function() {
+    var m = rnd(-3,3);
+    while(m===0) m=rnd(-3,3);
+    var b_val = rnd(-6,6);
+    var sign = b_val >= 0 ? '+' : '';
+    return {
+      texto: '¿Cuál es la pendiente de f(x) = ' + (m===1?'':m===(-1)?'-':m) + 'x ' + sign + b_val + '?',
+      sol: String(m), tipo: 'Pendiente e intersección',
+      pasos: ['En f(x) = mx + b', 'm (pendiente) = ' + m, 'b (intersección con eje Y) = ' + b_val],
+      distractores: function() { return [String(b_val), String(m+1), String(-m)]; }
+    };
+  });
+
+  return shuffle(ejs);
+}
+
+function genMatrices(nivel) {
+  var ejs = [];
+
+  ejs.push(function() {
+    var a=rnd(1,5),b=rnd(1,5),c=rnd(1,5),d=rnd(1,5);
+    var e=rnd(1,5),f=rnd(1,5),g=rnd(1,5),h=rnd(1,5);
+    return {
+      texto: 'Suma las matrices:\n[' + a + '  ' + b + '] + [' + e + '  ' + f + ']\n[' + c + '  ' + d + ']   [' + g + '  ' + h + ']',
+      sol: '[' + (a+e) + '  ' + (b+f) + ']\n[' + (c+g) + '  ' + (d+h) + ']',
+      tipo: 'Suma de matrices',
+      pasos: ['Sumar elemento a elemento', 'Fila 1: [' + a + '+' + e + ', ' + b + '+' + f + '] = [' + (a+e) + ', ' + (b+f) + ']', 'Fila 2: [' + c + '+' + g + ', ' + d + '+' + h + '] = [' + (c+g) + ', ' + (d+h) + ']'],
+      distractores: function() { return ['['+( a+e+1)+' '+( b+f)+'] / ['+( c+g)+' '+(d+h)+']', '['+a+' '+b+'] / ['+c+' '+d+']', '['+e+' '+f+'] / ['+g+' '+h+']']; }
+    };
+  });
+
+  return ejs;
+}
+
+// =====================================================
+// DISPATCHER POR TEMA
+// =====================================================
+function getGeneradores(tema, nivel, curso) {
+  var map = {
+    operaciones: genOperaciones,
+    fracciones: genFracciones,
+    ecuaciones: genEcuaciones,
+    geometria: genGeometria,
+    estadistica: genEstadistica,
+    algebra: genAlgebra,
+    potencias: genPotencias,
+    proporcionalidad: genProporcionalidad,
+    decimales: genDecimales,
+    sistemas: genSistemas,
+    probabilidad: genProbabilidad,
+    numeros: genNumeros,
+    trigonometria: genTrigonometria,
+    funciones: genFunciones,
+    matrices: genMatrices
+  };
+  var gen = map[tema];
+  return gen ? gen(nivel, curso) : [];
+}
+
+function frac(n, d) { return n + '/' + d; }
+
+// =====================================================
+// GENERADOR PRINCIPAL
+// =====================================================
+function generarEjercicios(seed) {
+  var curso = document.getElementById('m-curso').value;
+  var n = Math.min(parseInt(document.getElementById('m-num').value) || 10, 25);
+  var formato = (document.getElementById('formato') ? document.getElementById('formato').value : 'opcion');
+
+  if (!temasSel.length) { alert('Selecciona al menos un tema'); return null; }
+
+  // Recopilar todos los generadores de temas seleccionados
+  var pool = [];
+  temasSel.forEach(function(tema) {
+    var gens = getGeneradores(tema, nivel, curso);
+    gens.forEach(function(g) { pool.push({tema: tema, gen: g}); });
+  });
+
+  if (!pool.length) { alert('No hay ejercicios disponibles para esta combinación'); return null; }
+
+  var ejercicios = [];
+  for (var i = 0; i < n; i++) {
+    var item = pool[rnd(0, pool.length-1)];
+    try {
+      var ej = item.gen();
+      ej.tema = item.tema;
+      ej.idx = i + 1;
+      if (seed) {
+        // Para variante B, modificar los números ligeramente
+        if (typeof ej.sol === 'number') ej._seedOffset = seed;
+      }
+      ejercicios.push(ej);
+    } catch(e) { i--; }
+  }
+  return ejercicios;
+}
+
+// =====================================================
+// RENDER HTML
+// =====================================================
+function renderEj(ej, idx, showSol, variante) {
+  var formato = (document.getElementById('formato') ? document.getElementById('formato').value : 'opcion');
+  var esOpcion = formato === 'opcion' || (formato === 'mixto' && idx % 2 === 0) || formato === 'pasos';
+  var esAbierto = formato === 'abierto' || (formato === 'mixto' && idx % 2 !== 0);
+
+  var html = '<div class="ej" id="ej-' + (variante||'A') + '-' + idx + '">';
+  html += '<span class="ej-num">' + idx + '</span>';
+  html += '<div class="tipo-badge">' + (ej.tipo || 'Matemáticas') + '</div>';
+
+  // Texto del ejercicio — manejar fracciones
+  var texto = ej.texto.replace(/(\d+)\/(\d+)/g, function(m, n, d) {
+    return '<span class="frac"><span class="num-f">' + n + '</span><span class="den-f">' + d + '</span></span>';
+  });
+  // Manejar saltos de línea para sistemas
+  texto = texto.replace(/\n/g, '<br>');
+  html += '<div class="ej-texto">' + texto + '</div>';
+
+  if (showSol) {
+    // Modo soluciones: mostrar directamente
+    html += '<div class="sol-box visible"><strong>Solución: ' + ej.sol + '</strong>';
+    if (ej.pasos && ej.pasos.filter(Boolean).length) {
+      html += '<div class="sol-pasos">' + ej.pasos.filter(Boolean).map(function(p,i){return '<span style="display:block">'+(i+1)+'. '+p+'</span>'}).join('') + '</div>';
+    }
+    html += '</div>';
+  } else if (esOpcion) {
+    var ops = opciones4(ej.sol, ej.distractores);
+    html += '<div class="ej-opciones" id="ops-'+(variante||'A')+'-'+idx+'">';
+    ops.forEach(function(op) {
+      html += '<button class="opcion" onclick="selOpcion(this,\'' + op.replace(/'/g,"\\'") + '\',\'' + String(ej.sol).replace(/'/g,"\\'") + '\',\'ops-'+(variante||'A')+'-'+idx+'\')">' + op + '</button>';
+    });
+    html += '</div>';
+    html += '<button class="sol-btn" onclick="toggleSol(this)">Ver solución</button>';
+    html += '<div class="sol-box"><strong>Solución: ' + ej.sol + '</strong>';
+    if (ej.pasos && ej.pasos.filter(Boolean).length) {
+      html += '<div class="sol-pasos">' + ej.pasos.filter(Boolean).map(function(p,i){return '<span style="display:block">'+(i+1)+'. '+p+'</span>'}).join('') + '</div>';
+    }
+    html += '</div>';
+  } else {
+    html += '<div class="ej-espacio">Espacio para la resolución</div>';
+    html += '<button class="sol-btn" onclick="toggleSol(this)">Ver solución</button>';
+    html += '<div class="sol-box"><strong>Solución: ' + ej.sol + '</strong>';
+    if (ej.pasos && ej.pasos.filter(Boolean).length) {
+      html += '<div class="sol-pasos">' + ej.pasos.filter(Boolean).map(function(p,i){return '<span style="display:block">'+(i+1)+'. '+p+'</span>'}).join('') + '</div>';
+    }
+    html += '</div>';
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function selOpcion(btn, elegida, correcta, opsId) {
+  var container = document.getElementById(opsId);
+  container.querySelectorAll('.opcion').forEach(function(op) {
+    op.classList.remove('elegida');
+    if (op.textContent.trim() === correcta) op.classList.add('correcta-reveal');
+    else op.classList.add('incorrecta-reveal');
+  });
+  btn.classList.add('elegida');
+  actualizarProgreso();
+}
+
+function toggleSol(btn) {
+  var box = btn.nextElementSibling;
+  box.classList.toggle('visible');
+  btn.textContent = box.classList.contains('visible') ? 'Ocultar solución' : 'Ver solución';
+}
+
+function mostrarSoluciones() {
+  document.querySelectorAll('.sol-box').forEach(function(b) { b.classList.add('visible'); });
+  document.querySelectorAll('.sol-btn').forEach(function(b) { b.textContent = 'Ocultar solución'; });
+}
+
+function actualizarProgreso() {
+  var total = document.querySelectorAll('.ej').length;
+  var respondidos = document.querySelectorAll('.opcion.elegida').length;
+  var correctas = document.querySelectorAll('.opcion.elegida.correcta-reveal').length;
+  document.getElementById('progreso').innerHTML = respondidos ?
+    'Respondidos: ' + respondidos + '/' + total + ' — Correctas: <span style="color:var(--success)">'+correctas+'</span> / Incorrectas: <span style="color:var(--danger)">'+(respondidos-correctas)+'</span>' : '';
+}
+
+// =====================================================
+// ACCIONES PRINCIPALES
+// =====================================================
+function generar() {
+  modoAB = false;
+  ejerciciosActuales = generarEjercicios();
+  if (!ejerciciosActuales) return;
+
+  var rw = document.getElementById('result-wrap');
+  rw.classList.add('show');
+  document.getElementById('vtabs').style.display = 'none';
+  document.getElementById('ejercicios-B').style.display = 'none';
+  document.getElementById('ejercicios-SOL').style.display = 'none';
+  document.getElementById('ejercicios-A').style.display = 'flex';
+
+  var cursoEl = document.getElementById('curso');
+  var cursoNombre = cursoEl.options[cursoEl.selectedIndex].text;
+  document.getElementById('r-titulo').textContent = 'generados';
+  document.getElementById('r-meta').innerHTML =
+    '<span class="meta-pill">' + temasSel.map(function(t){return TEMAS[t].nombre}).join(', ') + '</span>' +
+    '<span class="meta-pill teal">' + cursoNombre + '</span>' +
+    '<span class="meta-pill">' + ejerciciosActuales.length + ' ejercicios · ' + nivel + '</span>';
+
+  document.getElementById('ejercicios-A').innerHTML = ejerciciosActuales.map(function(e,i) {
+    return renderEj(e, i+1, false, 'A');
+  }).join('');
+  document.getElementById('progreso').innerHTML = '';
+  rw.scrollIntoView({behavior:'smooth'});
+}
+
+function generarAB() {
+  modoAB = true;
+  ejerciciosActuales = generarEjercicios();
+  if (!ejerciciosActuales) return;
+  var ejB = generarEjercicios();
+  if (!ejB) return;
+
+  var rw = document.getElementById('result-wrap');
+  rw.classList.add('show');
+  document.getElementById('vtabs').style.display = 'flex';
+
+  var cursoEl = document.getElementById('curso');
+  var cursoNombre = cursoEl.options[cursoEl.selectedIndex].text;
+  document.getElementById('r-titulo').textContent = 'Variante A / B';
+  document.getElementById('r-meta').innerHTML =
+    '<span class="meta-pill">' + temasSel.map(function(t){return TEMAS[t].nombre}).join(', ') + '</span>' +
+    '<span class="meta-pill teal">' + cursoNombre + '</span>' +
+    '<span class="meta-pill">Misma dificultad · Datos distintos</span>';
+
+  document.getElementById('ejercicios-A').innerHTML = ejerciciosActuales.map(function(e,i) {
+    return renderEj(e, i+1, false, 'A');
+  }).join('');
+  document.getElementById('ejercicios-B').innerHTML = ejB.map(function(e,i) {
+    return renderEj(e, i+1, false, 'B');
+  }).join('');
+  document.getElementById('ejercicios-SOL').innerHTML =
+    '<div style="margin-bottom:12px;font-size:.82rem;color:var(--teal-hi);font-weight:600;letter-spacing:.05em">SOLUCIONES VARIANTE A</div>' +
+    ejerciciosActuales.map(function(e,i) { return renderEj(e, i+1, true, 'SA'); }).join('') +
+    '<div style="margin:16px 0 12px;font-size:.82rem;color:var(--primary-hi);font-weight:600;letter-spacing:.05em">SOLUCIONES VARIANTE B</div>' +
+    ejB.map(function(e,i) { return renderEj(e, i+1, true, 'SB'); }).join('');
+
+  selVar('A', document.querySelector('.vtab'));
+  rw.scrollIntoView({behavior:'smooth'});
+}
+
+function selVar(v, el) {
+  document.querySelectorAll('.vtab').forEach(function(b){b.classList.remove('on')});
+  el.classList.add('on');
+  ['A','B','SOL'].forEach(function(id) {
+    document.getElementById('ejercicios-'+id).style.display = id === v ? 'flex' : 'none';
+  });
+}
+
+// =====================================================
+// UI TEMAS Y NIVEL
+// =====================================================
+function selNivel(n, el) {
+  nivel = n;
+  ['basico','medio','avanzado'].forEach(function(id) {
+    document.getElementById('nv-'+id).classList.remove('on');
+  });
+  el.classList.add('on');
+  // Actualizar puntos
+  document.querySelectorAll('.nivel-btn').forEach(function(btn,i) {
+    var dots = btn.querySelectorAll('.dot');
+    var lvls = ['basico','medio','avanzado'];
+    var nFill = lvls.indexOf(lvls[i]) + 1;
+    dots.forEach(function(d, di) {
+      d.classList.toggle('fill', di < (i===0?1:i===1?2:3));
+    });
+  });
+}
+
+function togTema(el, id) {
+  var idx = temasSel.indexOf(id);
+  if (idx > -1) {
+    if (temasSel.length > 1) { temasSel.splice(idx, 1); el.classList.remove('on'); }
+  } else {
+    temasSel.push(id);
+    el.classList.add('on');
+  }
+}
+
+function selTodosT() {
+  var curso = document.getElementById('m-curso').value;
+  temasSel = Object.keys(TEMAS).filter(function(k){ return TEMAS[k].cursos.includes(curso); });
+  document.querySelectorAll('.tema-card').forEach(function(el) {
+    el.classList.toggle('on', temasSel.includes(el.dataset.id));
+  });
+}
+
+function renderTemas() {
+  var curso = document.getElementById('m-curso').value;
+  var grid = document.getElementById('temas-grid');
+  var temasDisp = Object.keys(TEMAS).filter(function(k){ return TEMAS[k].cursos.includes(curso); });
+
+  grid.innerHTML = temasDisp.map(function(k) {
+    var t = TEMAS[k];
+    var isOn = temasSel.includes(k);
+    return '<button class="tema-card' + (isOn?' on':'') + '" data-id="' + k + '" onclick="togTema(this,\'' + k + '\')">' +
+      '<div class="tema-icon">' + ICONOS_SVG[t.icono] + '</div>' +
+      '<div class="tema-name">' + t.nombre + '</div>' +
+      '</button>';
+  }).join('');
+
+  // Limpiar temas no disponibles
+  temasSel = temasSel.filter(function(k){ return temasDisp.includes(k); });
+  if (!temasSel.length && temasDisp.length) {
+    temasSel = [temasDisp[0]];
+    document.querySelector('.tema-card').classList.add('on');
+  }
+}
+
+// curso listener removed - handled by DocencIA
+
+// renderTemas removed
+
+// =====================================================
+
+
+// ═══════════════════════════════════════════════
+// BANCO DE PREGUNTAS — SIN API
+// 7 asignaturas · todos los niveles · 4 tipos
+// ═══════════════════════════════════════════════
+
+var BANCO = {
+
+// ─────────────────────────────────────────
+// LENGUA CASTELLANA
+// ─────────────────────────────────────────
+lengua: {
+  nombre: 'Lengua Castellana',
+  temas: {
+    gramatica: {
+      nombre: 'Gramática y morfología',
+      niveles: ['p5','p6','e1','e2','e3','e4','b1','b2'],
+      preguntas: [
+        {tipo:'mc', texto:'¿Cuál de estas palabras es un sustantivo?', opciones:['correr','rápido','mesa','debajo'], correcta:2},
+        {tipo:'mc', texto:'¿Cuál es el plural de "lápiz"?', opciones:['lápizes','lápices','lapices','lápizs'], correcta:1},
+        {tipo:'mc', texto:'¿Qué tipo de palabra es "debajo"?', opciones:['Sustantivo','Adverbio','Adjetivo','Verbo'], correcta:1},
+        {tipo:'mc', texto:'"El perro corre rápido." ¿Cuál es el sujeto?', opciones:['corre','rápido','el perro','perro corre'], correcta:2},
+        {tipo:'mc', texto:'¿Cuál de estas palabras es un adjetivo calificativo?', opciones:['saltar','hermoso','encima','nosotros'], correcta:1},
+        {tipo:'tf', texto:'El artículo es una parte variable de la oración.', correcta:true},
+        {tipo:'tf', texto:'Los adverbios son palabras invariables.', correcta:true},
+        {tipo:'tf', texto:'El verbo "ser" es un verbo irregular.', correcta:true},
+        {tipo:'tf', texto:'Los pronombres personales sustituyen al sustantivo.', correcta:true},
+        {tipo:'tf', texto:'El plural de "café" es "cafes".', correcta:false},
+        {tipo:'mc', texto:'¿Cuál es el antónimo de "alegre"?', opciones:['feliz','contento','triste','animado'], correcta:2},
+        {tipo:'mc', texto:'La oración "Llueve mucho" es:', opciones:['Personal','Impersonal','Pasiva','Reflexiva'], correcta:1},
+        {tipo:'mc', texto:'¿Qué modo verbal es "¡Come!"?', opciones:['Indicativo','Subjuntivo','Imperativo','Condicional'], correcta:2},
+        {tipo:'mc', texto:'"Anduve" es una forma del verbo andar en:', opciones:['Pretérito perfecto simple','Pretérito imperfecto','Futuro simple','Presente'], correcta:0},
+        {tipo:'mc', texto:'¿Cuál de estas palabras tiene diptongo?', opciones:['mesa','tierra','calle','primo'], correcta:1},
+        {tipo:'mc', texto:'El morfema que indica el género y número se llama:', opciones:['Lexema','Desinencia','Prefijo','Sufijo'], correcta:1},
+        {tipo:'tf', texto:'El sintagma nominal siempre lleva un verbo.', correcta:false},
+        {tipo:'tf', texto:'La preposición "a" puede indicar dirección.', correcta:true},
+        {tipo:'mc', texto:'¿Qué tipo de oración es "El libro fue leído por María"?', opciones:['Activa','Pasiva','Impersonal','Reflexiva'], correcta:1},
+        {tipo:'mc', texto:'¿Cuál de estas palabras es una conjunción copulativa?', opciones:['pero','porque','y','aunque'], correcta:2},
+        {tipo:'mc', texto:'El campo semántico de "mesa, silla, sofá, cama" es:', opciones:['Deportes','Muebles','Alimentos','Ropa'], correcta:1},
+        {tipo:'mc', texto:'¿Qué figura retórica es "Sus ojos son dos luceros"?', opciones:['Metáfora','Hipérbole','Anáfora','Aliteración'], correcta:0},
+        {tipo:'tf', texto:'El hiato se produce cuando dos vocales fuertes están juntas.', correcta:true},
+        {tipo:'mc', texto:'¿Cuál es el núcleo del sintagma nominal "el bonito jardín de flores"?', opciones:['bonito','jardín','flores','el'], correcta:1},
+        {tipo:'mc', texto:'Una oración subordinada sustantiva puede funcionar como:', opciones:['Sujeto o complemento directo','Solo sujeto','Solo predicado','Complemento circunstancial únicamente'], correcta:0},
+      ]
+    },
+    ortografia: {
+      nombre: 'Ortografía y acentuación',
+      niveles: ['p5','p6','e1','e2','e3'],
+      preguntas: [
+        {tipo:'mc', texto:'¿Cuál de estas palabras lleva tilde?', opciones:['cafe','examen','árbol','sobre'], correcta:2},
+        {tipo:'mc', texto:'"Sábado" es una palabra:', opciones:['Aguda','Llana','Esdrújula','Sobreesdrújula'], correcta:2},
+        {tipo:'mc', texto:'¿Cuándo se escribe "haber" (verbo auxiliar)?', opciones:['Antes de un nombre','Antes de un participio','Antes de un adjetivo','Antes de un adverbio'], correcta:1},
+        {tipo:'tf', texto:'Las palabras agudas se acentúan si terminan en vocal, "n" o "s".', correcta:true},
+        {tipo:'tf', texto:'"Solo" siempre lleva tilde.', correcta:false},
+        {tipo:'mc', texto:'¿Cuál es la regla de uso de "b/v"?', opciones:['Se escribe "b" antes de "l" o "r"','Se escribe "v" antes de "l" o "r"','No hay regla','Se alternan libremente'], correcta:0},
+        {tipo:'mc', texto:'¿Cuál de estas palabras está mal escrita?', opciones:['huevo','hierba','yerno','llanta'], correcta:2},
+        {tipo:'tf', texto:'Los diptongos siempre llevan tilde sobre la vocal fuerte.', correcta:false},
+        {tipo:'mc', texto:'"río" lleva tilde porque:', opciones:['Es esdrújula','Es aguda','Hay hiato','Es una excepción'], correcta:2},
+        {tipo:'mc', texto:'¿Cuál de estas palabras usa "g" y no "j"?', opciones:['caja','viaje','jefe','página'], correcta:1},
+      ]
+    },
+    literatura: {
+      nombre: 'Literatura española',
+      niveles: ['e2','e3','e4','b1','b2'],
+      preguntas: [
+        {tipo:'mc', texto:'¿En qué siglo se publicó "El Quijote"?', opciones:['Siglo XV','Siglo XVI','Siglo XVII','Siglo XVIII'], correcta:2},
+        {tipo:'mc', texto:'¿Quién escribió "La vida es sueño"?', opciones:['Lope de Vega','Calderón de la Barca','Quevedo','Góngora'], correcta:1},
+        {tipo:'mc', texto:'El Romanticismo español se caracteriza por:', opciones:['La razón y el orden','El individualismo y la libertad','El realismo social','El experimentalismo'], correcta:1},
+        {tipo:'mc', texto:'¿Qué es un soneto?', opciones:['Poema de 14 versos en dos cuartetos y dos tercetos','Poema épico de versos largos','Obra de teatro en verso','Novela corta'], correcta:0},
+        {tipo:'tf', texto:'Gustavo Adolfo Bécquer perteneció al Romanticismo.', correcta:true},
+        {tipo:'tf', texto:'"La Celestina" es una novela del siglo XIX.', correcta:false},
+        {tipo:'mc', texto:'La Generación del 98 surge como respuesta a:', opciones:['La guerra civil española','La pérdida de Cuba y Filipinas','La Revolución Francesa','La Restauración borbónica'], correcta:1},
+        {tipo:'mc', texto:'Federico García Lorca pertenece a:', opciones:['Generación del 98','Generación del 27','Modernismo','Realismo'], correcta:1},
+        {tipo:'mc', texto:'¿Qué figura retórica usa repetición al inicio de versos?', opciones:['Metáfora','Anáfora','Hipérbaton','Sinestesia'], correcta:1},
+        {tipo:'mc', texto:'El realismo literario del siglo XIX se caracteriza por:', opciones:['Mundos fantásticos','Descripción objetiva de la realidad social','Exaltación del yo','Temas medievales'], correcta:1},
+        {tipo:'mc', texto:'"Fortunata y Jacinta" es obra de:', opciones:['Clarín','Galdós','Pardo Bazán','Valera'], correcta:1},
+        {tipo:'tf', texto:'El verso alejandrino tiene 14 sílabas.', correcta:true},
+        {tipo:'mc', texto:'¿Qué movimiento artístico influyó en la Generación del 27?', opciones:['El Romanticismo','El Barroco','Las vanguardias europeas','El Naturalismo'], correcta:2},
+      ]
+    },
+    comunicacion: {
+      nombre: 'Comunicación y textos',
+      niveles: ['e1','e2','e3','e4','b1'],
+      preguntas: [
+        {tipo:'mc', texto:'¿Cuál es la función del lenguaje cuando expresamos sentimientos?', opciones:['Referencial','Expresiva','Apelativa','Metalingüística'], correcta:1},
+        {tipo:'mc', texto:'Un texto expositivo tiene como objetivo:', opciones:['Persuadir','Entretener','Informar objetivamente','Narrar hechos'], correcta:2},
+        {tipo:'tf', texto:'El emisor es quien recibe el mensaje.', correcta:false},
+        {tipo:'mc', texto:'¿Qué tipo de texto es una carta de reclamación?', opciones:['Narrativo','Argumentativo','Descriptivo','Expositivo'], correcta:1},
+        {tipo:'mc', texto:'La cohesión textual se consigue mediante:', opciones:['Uso de conectores y referencias','Solo puntuación','Solo vocabulario variado','La extensión del texto'], correcta:0},
+        {tipo:'tf', texto:'Los conectores de conclusión son: "por tanto", "en conclusión", "así pues".', correcta:true},
+        {tipo:'mc', texto:'La función apelativa del lenguaje es propia de:', opciones:['Un poema lírico','Un anuncio publicitario','Un reportaje','Un diario'], correcta:1},
+      ]
+    }
+  }
+},
+
+// ─────────────────────────────────────────
+// INGLÉS
+// ─────────────────────────────────────────
+ingles: {
+  nombre: 'Inglés',
+  temas: {
+    grammar: {
+      nombre: 'Grammar',
+      niveles: ['p5','p6','e1','e2','e3','e4','b1','b2'],
+      preguntas: [
+        {tipo:'mc', texto:'Choose the correct form: "She ___ to school every day."', opciones:['go','goes','going','gone'], correcta:1},
+        {tipo:'mc', texto:'Which sentence is in the Past Simple?', opciones:['I am going','I went','I have gone','I will go'], correcta:1},
+        {tipo:'mc', texto:'"I have lived here for 10 years." This is:', opciones:['Past Simple','Present Perfect','Past Continuous','Future'], correcta:1},
+        {tipo:'tf', texto:'"Much" is used with countable nouns.', correcta:false},
+        {tipo:'tf', texto:'"Many" is used with countable nouns.', correcta:true},
+        {tipo:'mc', texto:'Choose the correct question tag: "It\'s cold, ___?"', opciones:['is it','isn\'t it','doesn\'t it','wasn\'t it'], correcta:1},
+        {tipo:'mc', texto:'Which is the correct comparative form of "good"?', opciones:['gooder','more good','better','best'], correcta:2},
+        {tipo:'mc', texto:'"If I were rich, I ___ travel the world." (2nd conditional)', opciones:['will','would','can','shall'], correcta:1},
+        {tipo:'mc', texto:'Choose the correct passive: "The book ___ written by Dickens."', opciones:['is','was','were','has'], correcta:1},
+        {tipo:'tf', texto:'The Present Continuous is used for habits.', correcta:false},
+        {tipo:'mc', texto:'"She suggested ___ to the cinema." Choose the correct form:', opciones:['go','to go','going','gone'], correcta:2},
+        {tipo:'mc', texto:'Which modal expresses obligation?', opciones:['can','might','must','would'], correcta:2},
+        {tipo:'mc', texto:'"By 2025, they ___ finished the project." (Future Perfect)', opciones:['will have','would have','will be','have'], correcta:0},
+        {tipo:'tf', texto:'Reported speech changes "will" to "would".', correcta:true},
+        {tipo:'mc', texto:'Choose the correct relative pronoun: "The man ___ called is my uncle."', opciones:['which','whose','who','whom'], correcta:2},
+        {tipo:'mc', texto:'"Despite ___ tired, she finished the race."', opciones:['be','being','been','to be'], correcta:1},
+        {tipo:'mc', texto:'Which sentence uses the Past Perfect correctly?', opciones:['I had eaten before she arrived','I had eaten before she will arrive','I ate before she had arrived','I have eaten before she arrives'], correcta:0},
+        {tipo:'tf', texto:'"Used to" describes present habits.', correcta:false},
+        {tipo:'mc', texto:'"The more you practice, ___ you improve."', opciones:['more','the more','much more','so more'], correcta:1},
+        {tipo:'mc', texto:'Choose the correct preposition: "She is interested ___ science."', opciones:['on','in','at','by'], correcta:1},
+      ]
+    },
+    vocabulary: {
+      nombre: 'Vocabulary',
+      niveles: ['p5','p6','e1','e2','e3'],
+      preguntas: [
+        {tipo:'mc', texto:'What is the opposite of "ancient"?', opciones:['old','modern','big','slow'], correcta:1},
+        {tipo:'mc', texto:'Choose the correct word: "The doctor works in a ___."', opciones:['court','hospital','library','stadium'], correcta:1},
+        {tipo:'tf', texto:'"Sibling" means brother or sister.', correcta:true},
+        {tipo:'mc', texto:'What does "exhausted" mean?', opciones:['Happy','Very tired','Angry','Confused'], correcta:1},
+        {tipo:'mc', texto:'"To get up" means:', opciones:['To sleep','To wake up and rise from bed','To eat breakfast','To go outside'], correcta:1},
+        {tipo:'mc', texto:'Choose the correct word for weather: "It is very ___ today, I need an umbrella."', opciones:['sunny','foggy','rainy','windy'], correcta:2},
+        {tipo:'tf', texto:'"Beneath" means the same as "below".', correcta:true},
+        {tipo:'mc', texto:'What is a "peninsula"?', opciones:['A mountain surrounded by water','Land almost entirely surrounded by water','An island','A river delta'], correcta:1},
+        {tipo:'mc', texto:'"Approximately" means:', opciones:['Exactly','About / around','Definitely','Frequently'], correcta:1},
+        {tipo:'mc', texto:'The word "collaborate" means:', opciones:['To compete','To work together','To separate','To ignore'], correcta:1},
+      ]
+    },
+    reading: {
+      nombre: 'Reading & comprehension',
+      niveles: ['e1','e2','e3','e4','b1','b2'],
+      preguntas: [
+        {tipo:'mc', texto:'What does "infer" mean when reading a text?', opciones:['To copy information','To draw conclusions not directly stated','To summarize the text','To translate words'], correcta:1},
+        {tipo:'mc', texto:'A "narrative text" tells:', opciones:['How to do something','A story with characters and events','Scientific facts','An opinion'], correcta:1},
+        {tipo:'tf', texto:'The "main idea" is always in the first sentence of a paragraph.', correcta:false},
+        {tipo:'mc', texto:'Context clues help you:', opciones:['Write better sentences','Understand unfamiliar words','Memorize vocabulary','Check your grammar'], correcta:1},
+        {tipo:'mc', texto:'An "argumentative text" tries to:', opciones:['Entertain the reader','Persuade or convince','Describe a place','Give instructions'], correcta:1},
+        {tipo:'tf', texto:'"Skim reading" means reading every word carefully.', correcta:false},
+        {tipo:'mc', texto:'The tone of a text refers to:', opciones:['The font size','The author\'s attitude or feeling','The number of paragraphs','The text length'], correcta:1},
+      ]
+    }
+  }
+},
+
+// ─────────────────────────────────────────
+// HISTORIA
+// ─────────────────────────────────────────
+historia: {
+  nombre: 'Historia',
+  temas: {
+    prehistoria_antigua: {
+      nombre: 'Prehistoria y Edad Antigua',
+      niveles: ['p5','p6','e1','e2'],
+      preguntas: [
+        {tipo:'mc', texto:'¿Cuándo comienza la Historia?', opciones:['Con la aparición del homo sapiens','Con la invención de la escritura','Con el uso del fuego','Con la agricultura'], correcta:1},
+        {tipo:'mc', texto:'¿Qué civilización construyó las pirámides?', opciones:['Mesopotámica','Griega','Egipcia','Romana'], correcta:2},
+        {tipo:'tf', texto:'El Neolítico se caracteriza por la aparición de la agricultura y la ganadería.', correcta:true},
+        {tipo:'mc', texto:'¿Cuál fue la primera civilización de Mesopotamia?', opciones:['Asiria','Babilonia','Sumeria','Persia'], correcta:2},
+        {tipo:'mc', texto:'La democracia ateniense fue instaurada por:', opciones:['Sócrates','Clístenes','Pericles','Alejandro Magno'], correcta:1},
+        {tipo:'tf', texto:'Roma era originalmente una república antes de convertirse en Imperio.', correcta:true},
+        {tipo:'mc', texto:'¿Qué pueblo habitó la Península Ibérica antes de la llegada de romanos?', opciones:['Solo íberos','Solo celtas','Íberos, celtas, fenicios y griegos','Solo fenicios'], correcta:2},
+        {tipo:'mc', texto:'La Batalla de Maratón (490 a.C.) enfrentó a:', opciones:['Griegos y romanos','Griegos y persas','Espartanos y atenienses','Romanos y cartagineses'], correcta:1},
+        {tipo:'mc', texto:'¿Qué escritura usaban los egipcios?', opciones:['Cuneiforme','Jeroglífica','Alfabética','Pictográfica'], correcta:1},
+        {tipo:'tf', texto:'El Imperio Romano de Occidente cayó en el año 476 d.C.', correcta:true},
+      ]
+    },
+    edad_media: {
+      nombre: 'Edad Media',
+      niveles: ['e1','e2','e3'],
+      preguntas: [
+        {tipo:'mc', texto:'¿En qué año comenzó la Edad Media convencionalmente?', opciones:['476 d.C.','1453 d.C.','711 d.C.','800 d.C.'], correcta:0},
+        {tipo:'mc', texto:'El feudalismo se basa en:', opciones:['El comercio internacional','El intercambio de tierras por lealtad y servicios militares','La democracia parlamentaria','El poder de la burguesía'], correcta:1},
+        {tipo:'tf', texto:'Los vikingos procedían de Escandinavia.', correcta:true},
+        {tipo:'mc', texto:'¿Qué fue la Reconquista?', opciones:['La conquista de América','El proceso de recuperación cristiana de la Península Ibérica','La cruzada a Tierra Santa','La expansión del Islam por Europa'], correcta:1},
+        {tipo:'mc', texto:'¿En qué año se completó la Reconquista española?', opciones:['1212','1348','1492','1516'], correcta:2},
+        {tipo:'mc', texto:'La Carta Magna (1215) limitó el poder de:', opciones:['El Papa','El rey de Inglaterra','El Sacro Imperio','Los señores feudales'], correcta:1},
+        {tipo:'tf', texto:'La Peste Negra del siglo XIV mató aproximadamente a un tercio de la población europea.', correcta:true},
+        {tipo:'mc', texto:'Las Cruzadas tenían como objetivo principal:', opciones:['Conquistar América','Recuperar Jerusalén y Tierra Santa','Expandir el Islam','Comerciar con Asia'], correcta:1},
+        {tipo:'mc', texto:'¿Qué obra literaria medieval española narra las hazañas del Cid?', opciones:['El Libro de Buen Amor','El Cantar de Mio Cid','La Celestina','El Quijote'], correcta:1},
+      ]
+    },
+    edad_moderna: {
+      nombre: 'Edad Moderna',
+      niveles: ['e2','e3','e4'],
+      preguntas: [
+        {tipo:'mc', texto:'¿En qué año llegó Colón a América?', opciones:['1481','1492','1498','1504'], correcta:1},
+        {tipo:'mc', texto:'¿Qué monarquía financió el viaje de Colón?', opciones:['Portuguesa','Inglesa','Española','Francesa'], correcta:2},
+        {tipo:'tf', texto:'La Reforma Protestante fue iniciada por Martín Lutero en 1517.', correcta:true},
+        {tipo:'mc', texto:'El Renacimiento se originó en:', opciones:['Francia','España','Italia','Países Bajos'], correcta:2},
+        {tipo:'mc', texto:'¿Quién fue el primer monarca de la España unificada?', opciones:['Felipe II','Carlos I','Fernando e Isabel','Alfonso X'], correcta:2},
+        {tipo:'mc', texto:'La Revolución Científica del siglo XVII la protagonizaron:', opciones:['Platón y Aristóteles','Newton, Galileo y Copérnico','Descartes y Voltaire','Lutero y Calvino'], correcta:1},
+        {tipo:'tf', texto:'El absolutismo defiende que el poder del rey es ilimitado y de origen divino.', correcta:true},
+        {tipo:'mc', texto:'¿Qué tratado puso fin a la Guerra de los Treinta Años?', opciones:['Tratado de Utrecht','Paz de Westfalia','Tratado de Versalles','Paz de Augsburgo'], correcta:1},
+      ]
+    },
+    edad_contemporanea: {
+      nombre: 'Edad Contemporánea',
+      niveles: ['e3','e4','b1','b2'],
+      preguntas: [
+        {tipo:'mc', texto:'¿En qué año comenzó la Revolución Francesa?', opciones:['1776','1789','1799','1804'], correcta:1},
+        {tipo:'mc', texto:'¿Qué fue la Ilustración?', opciones:['Un movimiento artístico medieval','Un movimiento intelectual del siglo XVIII basado en la razón','Una revolución industrial','Un movimiento religioso'], correcta:1},
+        {tipo:'tf', texto:'La Revolución Industrial comenzó en Gran Bretaña.', correcta:true},
+        {tipo:'mc', texto:'¿Cuándo comenzó la Primera Guerra Mundial?', opciones:['1914','1918','1939','1945'], correcta:0},
+        {tipo:'mc', texto:'¿Qué provocó el inicio de la Primera Guerra Mundial?', opciones:['La invasión de Polonia','El asesinato del archiduque Francisco Fernando','La Revolución Rusa','La crisis económica de 1929'], correcta:1},
+        {tipo:'tf', texto:'La Revolución Rusa de 1917 instauró el comunismo en Rusia.', correcta:true},
+        {tipo:'mc', texto:'¿En qué año comenzó la Segunda Guerra Mundial?', opciones:['1933','1936','1939','1941'], correcta:2},
+        {tipo:'mc', texto:'La ONU fue fundada en:', opciones:['1919','1939','1945','1948'], correcta:2},
+        {tipo:'mc', texto:'¿Qué fue el Plan Marshall?', opciones:['Un plan militar de defensa','Un plan de ayuda económica de EE.UU. a Europa tras la IIGM','Un tratado de paz','Un acuerdo nuclear'], correcta:1},
+        {tipo:'tf', texto:'El Muro de Berlín cayó en 1989.', correcta:true},
+        {tipo:'mc', texto:'¿Cuándo se aprobó la Constitución Española actual?', opciones:['1975','1977','1978','1982'], correcta:2},
+        {tipo:'mc', texto:'La Guerra Fría enfrentó principalmente a:', opciones:['EE.UU. y Alemania','EE.UU. y la URSS','Europa y Asia','China y EE.UU.'], correcta:1},
+      ]
+    }
+  }
+},
+
+// ─────────────────────────────────────────
+// BIOLOGÍA Y GEOLOGÍA
+// ─────────────────────────────────────────
+biologia: {
+  nombre: 'Biología y Geología',
+  temas: {
+    celula: {
+      nombre: 'La célula y los seres vivos',
+      niveles: ['e1','e2','e3','e4','b1'],
+      preguntas: [
+        {tipo:'mc', texto:'¿Cuál es la unidad básica de los seres vivos?', opciones:['El tejido','La célula','El órgano','El sistema'], correcta:1},
+        {tipo:'mc', texto:'¿Qué diferencia a la célula vegetal de la animal?', opciones:['Solo el tamaño','La pared celular y los cloroplastos','El núcleo','Los ribosomas'], correcta:1},
+        {tipo:'tf', texto:'Las bacterias son organismos procariotas.', correcta:true},
+        {tipo:'mc', texto:'¿Dónde se encuentra el material genético en las células eucariotas?', opciones:['En el citoplasma','En el núcleo','En las mitocondrias','En la membrana'], correcta:1},
+        {tipo:'mc', texto:'¿Cuál es la función de la mitocondria?', opciones:['Síntesis de proteínas','Producción de energía (ATP)','Fotosíntesis','Digestión celular'], correcta:1},
+        {tipo:'tf', texto:'Los virus son seres vivos con células propias.', correcta:false},
+        {tipo:'mc', texto:'La fotosíntesis ocurre en:', opciones:['Las mitocondrias','Los ribosomas','Los cloroplastos','El núcleo'], correcta:2},
+        {tipo:'mc', texto:'La ecuación simplificada de la fotosíntesis es:', opciones:['CO₂+H₂O+luz→glucosa+O₂','O₂+glucosa→CO₂+H₂O','H₂O+luz→H₂+O₂','CO₂+luz→glucosa'], correcta:0},
+        {tipo:'mc', texto:'¿Qué orgánulo fabrica las proteínas?', opciones:['Vacuola','Ribosoma','Lisosoma','Centrosoma'], correcta:1},
+        {tipo:'tf', texto:'La membrana plasmática regula el paso de sustancias.', correcta:true},
+      ]
+    },
+    genetica: {
+      nombre: 'Genética y herencia',
+      niveles: ['e3','e4','b1','b2'],
+      preguntas: [
+        {tipo:'mc', texto:'¿Qué molécula transporta la información genética?', opciones:['ARN','ATP','ADN','Proteínas'], correcta:2},
+        {tipo:'mc', texto:'¿Cuántos cromosomas tiene una célula humana somática?', opciones:['23','46','48','64'], correcta:1},
+        {tipo:'tf', texto:'Los gametos son células haploides.', correcta:true},
+        {tipo:'mc', texto:'¿Qué es un alelo?', opciones:['Un cromosoma completo','Una forma alternativa de un gen','Un tipo de ARN','Una proteína'], correcta:1},
+        {tipo:'mc', texto:'Según Mendel, si "A" es dominante sobre "a", el cruce Aa × Aa produce:', opciones:['100% AA','75% A_ y 25% aa','50% Aa','100% aa'], correcta:1},
+        {tipo:'tf', texto:'La mutación es siempre perjudicial para el organismo.', correcta:false},
+        {tipo:'mc', texto:'La meiosis produce:', opciones:['2 células diploides','4 células diploides','4 células haploides','2 células haploides'], correcta:2},
+        {tipo:'mc', texto:'El ARN mensajero lleva la información del ADN hacia:', opciones:['El núcleo','Los ribosomas','Las mitocondrias','La membrana'], correcta:1},
+      ]
+    },
+    ecosistemas: {
+      nombre: 'Ecosistemas y ecología',
+      niveles: ['e1','e2','e3','e4'],
+      preguntas: [
+        {tipo:'mc', texto:'¿Qué es un ecosistema?', opciones:['Solo los animales de una zona','El conjunto de seres vivos y su medio físico','Solo las plantas de una zona','El clima de una región'], correcta:1},
+        {tipo:'mc', texto:'En una cadena trófica, los productores son:', opciones:['Los carnívoros','Los descomponedores','Las plantas','Los herbívoros'], correcta:2},
+        {tipo:'tf', texto:'El efecto invernadero es causado solo por el CO₂.', correcta:false},
+        {tipo:'mc', texto:'¿Qué es la biodiversidad?', opciones:['Solo el número de animales','La variedad de formas de vida en un ecosistema','El estudio del clima','La cantidad de plantas'], correcta:1},
+        {tipo:'mc', texto:'Un organismo que se alimenta de plantas y animales se llama:', opciones:['Herbívoro','Carnívoro','Omnívoro','Detritívoro'], correcta:2},
+        {tipo:'tf', texto:'La deforestación reduce la biodiversidad.', correcta:true},
+        {tipo:'mc', texto:'¿Qué es el ciclo del nitrógeno?', opciones:['El movimiento del agua en la naturaleza','El proceso de transformación del nitrógeno entre seres vivos y el suelo','La fotosíntesis','La respiración celular'], correcta:1},
+        {tipo:'mc', texto:'Los descomponedores (bacterias y hongos) se encargan de:', opciones:['Producir energía solar','Degradar la materia orgánica muerta','Realizar la fotosíntesis','Fijar el CO₂'], correcta:1},
+      ]
+    },
+    geologia: {
+      nombre: 'Geología y Tierra',
+      niveles: ['e1','e2','e3','b1'],
+      preguntas: [
+        {tipo:'mc', texto:'¿Cuáles son las capas de la Tierra de fuera a dentro?', opciones:['Núcleo, manto, corteza','Corteza, manto, núcleo','Manto, corteza, núcleo','Corteza, núcleo, manto'], correcta:1},
+        {tipo:'mc', texto:'¿Qué teoría explica el movimiento de los continentes?', opciones:['Teoría del Big Bang','Tectónica de placas','Teoría de la evolución','Teoría celular'], correcta:1},
+        {tipo:'tf', texto:'Los terremotos se producen en los límites de las placas tectónicas.', correcta:true},
+        {tipo:'mc', texto:'¿Cómo se forman las rocas sedimentarias?', opciones:['Por solidificación del magma','Por metamorfismo','Por acumulación y compactación de sedimentos','Por fusión de minerales'], correcta:2},
+        {tipo:'mc', texto:'¿Qué es el magma?', opciones:['Roca sólida del manto','Roca fundida bajo la superficie terrestre','Agua subterránea','Gas volcánico'], correcta:1},
+        {tipo:'tf', texto:'La erosión es causada por el agua, el viento y el hielo.', correcta:true},
+        {tipo:'mc', texto:'¿Cuántos años tiene aproximadamente la Tierra?', opciones:['4.500 millones','1.000 millones','10.000 millones','500 millones'], correcta:0},
+      ]
+    }
+  }
+},
+
+// ─────────────────────────────────────────
+// FÍSICA Y QUÍMICA
+// ─────────────────────────────────────────
+fisica: {
+  nombre: 'Física y Química',
+  temas: {
+    materia: {
+      nombre: 'Materia y sus propiedades',
+      niveles: ['e1','e2','e3'],
+      preguntas: [
+        {tipo:'mc', texto:'¿Qué estados de la materia existen?', opciones:['Sólido y líquido','Sólido, líquido y gaseoso','Sólido, líquido, gaseoso y plasma','Solo sólido'], correcta:2},
+        {tipo:'mc', texto:'¿Qué es la densidad?', opciones:['Masa × volumen','Masa / volumen','Volumen / masa','Masa + volumen'], correcta:1},
+        {tipo:'tf', texto:'La ebullición del agua a nivel del mar ocurre a 100°C.', correcta:true},
+        {tipo:'mc', texto:'¿Qué tipo de mezcla es el agua con sal?', opciones:['Heterogénea','Homogénea (disolución)','Coloide','Compuesto'], correcta:1},
+        {tipo:'mc', texto:'¿Cómo se llama el paso de sólido a gas directamente?', opciones:['Fusión','Evaporación','Sublimación','Condensación'], correcta:2},
+        {tipo:'tf', texto:'Una mezcla puede separarse por métodos físicos.', correcta:true},
+        {tipo:'mc', texto:'¿Qué es un elemento químico?', opciones:['Una mezcla de átomos','Una sustancia formada por un solo tipo de átomos','Un compuesto de dos elementos','Una molécula compleja'], correcta:1},
+        {tipo:'mc', texto:'El número atómico de un elemento indica:', opciones:['El número de neutrones','El número de protones','La masa atómica','El número de electrones de valencia'], correcta:1},
+      ]
+    },
+    quimica: {
+      nombre: 'Química: reacciones y compuestos',
+      niveles: ['e3','e4','b1','b2'],
+      preguntas: [
+        {tipo:'mc', texto:'En una reacción química, los reactivos se transforman en:', opciones:['Elementos','Productos','Mezclas','Isótopos'], correcta:1},
+        {tipo:'mc', texto:'La tabla periódica organiza los elementos por:', opciones:['Masa y estado','Número atómico y propiedades','Nombre alfabético','Color y dureza'], correcta:1},
+        {tipo:'tf', texto:'La Ley de Lavoisier dice que la masa se conserva en una reacción química.', correcta:true},
+        {tipo:'mc', texto:'¿Qué tipo de enlace forma el NaCl?', opciones:['Covalente','Metálico','Iónico','Por puentes de hidrógeno'], correcta:2},
+        {tipo:'mc', texto:'El pH de una solución ácida es:', opciones:['Mayor que 7','Igual a 7','Menor que 7','Mayor que 14'], correcta:2},
+        {tipo:'tf', texto:'El hidrógeno es el elemento más abundante del universo.', correcta:true},
+        {tipo:'mc', texto:'¿Qué es la oxidación?', opciones:['Pérdida de electrones','Ganancia de electrones','Pérdida de protones','Ganancia de neutrones'], correcta:0},
+        {tipo:'mc', texto:'La fórmula del ácido sulfúrico es:', opciones:['HCl','H₂SO₄','H₂O₂','HNO₃'], correcta:1},
+        {tipo:'mc', texto:'Un catalizador en una reacción química:', opciones:['Se consume en la reacción','Aumenta la velocidad sin consumirse','Produce más calor','Cambia el pH'], correcta:1},
+      ]
+    },
+    fisica_mov: {
+      nombre: 'Física: movimiento y fuerzas',
+      niveles: ['e2','e3','e4','b1','b2'],
+      preguntas: [
+        {tipo:'mc', texto:'La velocidad se calcula como:', opciones:['v = masa × aceleración','v = espacio / tiempo','v = fuerza / masa','v = tiempo / espacio'], correcta:1},
+        {tipo:'mc', texto:'La Primera Ley de Newton (inercia) dice que:', opciones:['F = m × a','Un cuerpo en reposo tiende a seguir en reposo si no actúa una fuerza','Acción y reacción son iguales','La energía se conserva'], correcta:1},
+        {tipo:'tf', texto:'La unidad de fuerza en el Sistema Internacional es el Newton.', correcta:true},
+        {tipo:'mc', texto:'¿Qué fórmula expresa la Segunda Ley de Newton?', opciones:['E = mc²','F = m × a','v = d/t','P = F/A'], correcta:1},
+        {tipo:'mc', texto:'La energía cinética es:', opciones:['La energía almacenada','La energía debida al movimiento','La energía térmica','La energía potencial gravitatoria'], correcta:1},
+        {tipo:'tf', texto:'La energía no se crea ni se destruye, solo se transforma.', correcta:true},
+        {tipo:'mc', texto:'¿Cuál es la unidad de presión?', opciones:['Newton','Joule','Pascal','Watt'], correcta:2},
+        {tipo:'mc', texto:'La velocidad de la luz en el vacío es aproximadamente:', opciones:['300.000 km/s','150.000 km/s','3.000 km/s','300 km/s'], correcta:0},
+        {tipo:'mc', texto:'¿Qué es la gravedad?', opciones:['Una fuerza electromagnética','La fuerza de atracción entre masas','Una fuerza nuclear','Una fuerza de repulsión'], correcta:1},
+        {tipo:'tf', texto:'En el vacío, todos los objetos caen con la misma aceleración independientemente de su masa.', correcta:true},
+      ]
+    },
+    electricidad: {
+      nombre: 'Electricidad y ondas',
+      niveles: ['e3','e4','b1','b2'],
+      preguntas: [
+        {tipo:'mc', texto:'La Ley de Ohm relaciona:', opciones:['Masa y aceleración','Voltaje, corriente y resistencia','Presión y volumen','Temperatura y energía'], correcta:1},
+        {tipo:'mc', texto:'La fórmula de la Ley de Ohm es:', opciones:['V = I + R','V = I × R','V = I / R','V = R / I'], correcta:1},
+        {tipo:'tf', texto:'La corriente alterna (CA) cambia de dirección periódicamente.', correcta:true},
+        {tipo:'mc', texto:'¿Cuál es la unidad de resistencia eléctrica?', opciones:['Amperio','Voltio','Ohmio','Watio'], correcta:2},
+        {tipo:'mc', texto:'Las ondas electromagnéticas:', opciones:['Necesitan un medio material para propagarse','Pueden propagarse en el vacío','Solo se propagan en el agua','Solo se propagan en sólidos'], correcta:1},
+        {tipo:'tf', texto:'La luz visible es un tipo de onda electromagnética.', correcta:true},
+        {tipo:'mc', texto:'¿Qué es la potencia eléctrica?', opciones:['Energía almacenada','Energía consumida por unidad de tiempo','Diferencia de potencial','Resistencia del circuito'], correcta:1},
+      ]
+    }
+  }
+},
+
+// ─────────────────────────────────────────
+// GEOGRAFÍA
+// ─────────────────────────────────────────
+geografia: {
+  nombre: 'Geografía',
+  temas: {
+    fisica: {
+      nombre: 'Geografía física',
+      niveles: ['p5','p6','e1','e2','e3'],
+      preguntas: [
+        {tipo:'mc', texto:'¿Cuántos continentes hay en la Tierra?', opciones:['5','6','7','8'], correcta:2},
+        {tipo:'mc', texto:'¿Cuál es el río más largo del mundo?', opciones:['Amazonas','Nilo','Yangtsé','Misisipi'], correcta:1},
+        {tipo:'tf', texto:'Los paralelos son líneas imaginarias que van de polo a polo.', correcta:false},
+        {tipo:'mc', texto:'¿Cuál es la montaña más alta del mundo?', opciones:['K2','Monte Everest','Aconcagua','Mont Blanc'], correcta:1},
+        {tipo:'mc', texto:'¿Qué es un istmo?', opciones:['Una isla grande','Una franja de tierra que une dos masas continentales','Una corriente marina','Una cadena montañosa'], correcta:1},
+        {tipo:'tf', texto:'El Ecuador divide la Tierra en hemisferio norte y sur.', correcta:true},
+        {tipo:'mc', texto:'¿Cuál es el océano más grande?', opciones:['Atlántico','Índico','Ártico','Pacífico'], correcta:3},
+        {tipo:'mc', texto:'Las coordenadas geográficas se expresan en:', opciones:['Kilómetros y metros','Latitud y longitud','Norte y sur','Grados y kilómetros'], correcta:1},
+        {tipo:'mc', texto:'¿Qué tipo de clima tiene el ecuador terrestre?', opciones:['Desértico','Polar','Ecuatorial','Mediterráneo'], correcta:2},
+        {tipo:'tf', texto:'La corriente del Golfo hace más cálido el clima de Europa occidental.', correcta:true},
+        {tipo:'mc', texto:'¿Cuál es el desierto más grande del mundo?', opciones:['Desierto del Sahara','Desierto de Arabia','Desierto Antártico','Desierto de Gobi'], correcta:2},
+        {tipo:'mc', texto:'Las placas tectónicas en los límites de subducción forman:', opciones:['Llanuras','Fosas oceánicas y volcanes','Deltas','Marismas'], correcta:1},
+      ]
+    },
+    humana: {
+      nombre: 'Geografía humana y económica',
+      niveles: ['e2','e3','e4','b1'],
+      preguntas: [
+        {tipo:'mc', texto:'¿Qué es la natalidad?', opciones:['Número de muertes por cada 1000 hab.','Número de nacimientos por cada 1000 hab.','Diferencia entre nacimientos y muertes','Número de inmigrantes'], correcta:1},
+        {tipo:'mc', texto:'El sector primario incluye:', opciones:['Industria y construcción','Agricultura, ganadería, pesca y minería','Comercio y servicios','Tecnología y comunicaciones'], correcta:1},
+        {tipo:'tf', texto:'La densidad de población mide el número de habitantes por km².', correcta:true},
+        {tipo:'mc', texto:'¿Qué es la emigración?', opciones:['Llegar a un país para vivir en él','Salir del propio país para vivir en otro','Moverse dentro del mismo país','El aumento de la natalidad'], correcta:1},
+        {tipo:'mc', texto:'El PIB (Producto Interior Bruto) mide:', opciones:['La felicidad de un país','El valor de todos los bienes y servicios producidos en un país','El número de habitantes','Las exportaciones de un país'], correcta:1},
+        {tipo:'tf', texto:'La globalización ha aumentado el comercio internacional.', correcta:true},
+        {tipo:'mc', texto:'¿Cuál es la ciudad más poblada del mundo?', opciones:['Nueva York','Ciudad de México','Tokio','Shanghái'], correcta:2},
+        {tipo:'mc', texto:'El desarrollo sostenible pretende:', opciones:['Maximizar el crecimiento económico sin límites','Satisfacer las necesidades actuales sin comprometer las futuras','Industrializar todos los países','Eliminar el comercio internacional'], correcta:1},
+        {tipo:'mc', texto:'¿Qué es el éxodo rural?', opciones:['El abandono del campo para vivir en ciudades','El retorno a las zonas rurales','La migración internacional','La expansión de las ciudades'], correcta:0},
+        {tipo:'tf', texto:'Los países del norte global tienen en general mayor índice de desarrollo humano.', correcta:true},
+      ]
+    },
+    espana: {
+      nombre: 'Geografía de España',
+      niveles: ['e1','e2','e3'],
+      preguntas: [
+        {tipo:'mc', texto:'¿Cuál es la capital de España?', opciones:['Barcelona','Sevilla','Madrid','Valencia'], correcta:2},
+        {tipo:'mc', texto:'¿Cuántas comunidades autónomas tiene España?', opciones:['15','17','19','21'], correcta:1},
+        {tipo:'tf', texto:'El río Ebro desemboca en el mar Mediterráneo.', correcta:true},
+        {tipo:'mc', texto:'¿Cuál es la cumbre más alta de España?', opciones:['Mulhacén','Teide','Aneto','Veleta'], correcta:1},
+        {tipo:'mc', texto:'¿Qué cordillera separa España de Francia?', opciones:['Sistema Ibérico','Pirineos','Cordillera Cantábrica','Sierra Nevada'], correcta:1},
+        {tipo:'mc', texto:'¿Cuántas islas forman las Islas Canarias?', opciones:['5','6','7','8'], correcta:2},
+        {tipo:'tf', texto:'España comparte frontera con Portugal y Francia.', correcta:true},
+        {tipo:'mc', texto:'El clima mediterráneo en España se caracteriza por:', opciones:['Lluvias abundantes todo el año','Veranos secos y calurosos, inviernos suaves','Temperaturas extremas todo el año','Nieves permanentes'], correcta:1},
+      ]
+    }
+  }
+}
+
+}; // fin BANCO
+
+// ─────────────────────────────────────────
+// MOTOR DE GENERACIÓN SIN API
+// ─────────────────────────────────────────
+
+var ASIG_MAP = {
+  'Lengua Castellana': 'lengua',
+  'Lengua y Literatura': 'lengua',
+  'Inglés': 'ingles',
+  'Historia de España': 'historia',
+  'Historia del Mundo Contemporáneo': 'historia',
+  'Geografía e Historia': 'historia',
+  'Biología y Geología': 'biologia',
+  'Biología': 'biologia',
+  'Física y Química': 'fisica',
+  'Física': 'fisica',
+  'Química': 'fisica',
+  'Geografía': 'geografia'
+};
+
+var NIVEL_MAP = {
+  '3º Primaria':'p3','4º Primaria':'p4','5º Primaria':'p5','6º Primaria':'p6',
+  '1º ESO':'e1','2º ESO':'e2','3º ESO':'e3','4º ESO':'e4',
+  '1º Bachillerato':'b1','2º Bachillerato':'b2'
+};
+
+function bancoGetTemas(asigKey, nivelKey) {
+  var asig = BANCO[asigKey];
+  if (!asig) return [];
+  var temas = [];
+  Object.keys(asig.temas).forEach(function(tk) {
+    var t = asig.temas[tk];
+    if (t.niveles.indexOf(nivelKey) >= 0) {
+      t.preguntas.forEach(function(p) {
+        temas.push(Object.assign({}, p, {temaLabel: t.nombre}));
+      });
+    }
+  });
+  return temas;
+}
+
+function rndInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+function shuffleArr(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function generarBanco(asigKey, nivelKey, n, tipoFiltro) {
+  var pool = bancoGetTemas(asigKey, nivelKey);
+  if (!pool.length) return null;
+  if (tipoFiltro && tipoFiltro !== 'todos') {
+    var filtered = pool.filter(function(p) { return p.tipo === tipoFiltro; });
+    if (filtered.length) pool = filtered;
+  }
+  pool = shuffleArr(pool);
+  var sel = pool.slice(0, Math.min(n, pool.length));
+  // Si no hay suficientes, repetir aleatoriamente
+  while (sel.length < n) {
+    sel.push(pool[rndInt(0, pool.length - 1)]);
+  }
+  return sel.slice(0, n);
+}
+
+function renderBancoEj(preguntas, showSol, variante) {
+  if (!preguntas || !preguntas.length) return '<div style="text-align:center;padding:20px;color:var(--text-muted)">No hay preguntas para esta combinación. Prueba otro nivel o asignatura.</div>';
+  return preguntas.map(function(p, idx) {
+    var id = (variante || 'Q') + idx;
+    var html = '<div class="ej">';
+    html += '<span class="ej-num">' + (idx + 1) + '</span>';
+    html += '<div class="tipo-badge">' + (p.temaLabel || 'Pregunta') + '</div>';
+    html += '<div class="ej-texto">' + p.texto + '</div>';
+
+    if (p.tipo === 'mc') {
+      if (showSol) {
+        html += '<div class="ej-opciones">';
+        p.opciones.forEach(function(op, oi) {
+          var isCorr = oi === p.correcta;
+          html += '<span class="opcion ' + (isCorr ? 'correcta-reveal' : '') + '">' + String.fromCharCode(65+oi) + ') ' + op + '</span>';
+        });
+        html += '</div>';
+      } else {
+        html += '<div class="ej-opciones" id="opts-' + id + '">';
+        p.opciones.forEach(function(op, oi) {
+          html += '<button class="opcion" onclick="bancoSelOp(this,\'' + id + '\',' + oi + ',' + p.correcta + ')">' + String.fromCharCode(65+oi) + ') ' + op + '</button>';
+        });
+        html += '</div>';
+        if (showSol) {
+          html += '<div class="sol-box visible"><strong>Respuesta: ' + String.fromCharCode(65+p.correcta) + ') ' + p.opciones[p.correcta] + '</strong></div>';
+        } else {
+          html += '<button class="sol-btn" onclick="toggleSolBtn(this)">Ver respuesta</button>';
+          html += '<div class="sol-box"><strong>Respuesta: ' + String.fromCharCode(65+p.correcta) + ') ' + p.opciones[p.correcta] + '</strong></div>';
+        }
+      }
+    } else if (p.tipo === 'tf') {
+      if (showSol) {
+        html += '<div class="ej-opciones">';
+        ['Verdadero','Falso'].forEach(function(op, oi) {
+          var isCorr = (oi === 0) === p.correcta;
+          html += '<span class="opcion ' + (isCorr ? 'correcta-reveal' : '') + '">' + op + '</span>';
+        });
+        html += '</div>';
+      } else {
+        html += '<div class="ej-opciones" id="opts-' + id + '">';
+        ['Verdadero','Falso'].forEach(function(op, oi) {
+          var corrIdx = p.correcta ? 0 : 1;
+          html += '<button class="opcion" onclick="bancoSelOp(this,\'' + id + '\',' + oi + ',' + corrIdx + ')">' + op + '</button>';
+        });
+        html += '</div>';
+        html += '<button class="sol-btn" onclick="toggleSolBtn(this)">Ver respuesta</button>';
+        html += '<div class="sol-box"><strong>Respuesta: ' + (p.correcta ? 'Verdadero' : 'Falso') + '</strong></div>';
+      }
+    } else if (p.tipo === 'hueco') {
+      html += '<div class="ej-espacio">Respuesta: ___________________________</div>';
+      html += '<button class="sol-btn" onclick="toggleSolBtn(this)">Ver respuesta</button>';
+      html += '<div class="sol-box"><strong>' + p.correcta + '</strong></div>';
+    }
+
+    html += '</div>';
+    return html;
+  }).join('');
+}
+
+function bancoSelOp(btn, id, elegida, correcta) {
+  var cont = document.getElementById('opts-' + id);
+  if (!cont) return;
+  cont.querySelectorAll('.opcion').forEach(function(b, i) {
+    b.classList.remove('elegida','correcta-reveal','incorrecta-reveal');
+    if (i === correcta) b.classList.add('correcta-reveal');
+    else b.classList.add('incorrecta-reveal');
+  });
+  btn.classList.add('elegida');
+}
+
+function toggleSolBtn(btn) {
+  var box = btn.nextElementSibling;
+  box.classList.toggle('visible');
+  btn.textContent = box.classList.contains('visible') ? 'Ocultar respuesta' : 'Ver respuesta';
+}
+
 
 // ═══════════════════════════════════════
 // MÓDULO EXÁMENES
