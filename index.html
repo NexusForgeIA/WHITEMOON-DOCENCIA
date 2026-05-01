@@ -789,8 +789,8 @@ tr:hover td { background: var(--bg-hi); }
       <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     </button>
 
-    <button class="sb-btn" id="btn-corrector" onclick="sw('corrector',1)" title="Corrector de exámenes">
-      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <button class="sb-btn" id="btn-corrector" onclick="sw('corrector',1)" title="Registro de notas">
+      <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
     </button>
 
     <button class="sb-btn" id="btn-tests" onclick="sw('tests',2)" title="Generador de tests">
@@ -871,100 +871,31 @@ tr:hover td { background: var(--bg-hi); }
 
       <!-- CORRECTOR -->
       <div class="panel" id="p-corrector">
-        <div class="pt">Corrector de <span>exámenes</span></div>
-        <div class="pd">Corrección automática con feedback por pregunta y texto listo para el boletín</div>
+        <div class="pt">Registro de <span>notas</span></div>
+        <div class="pd">Añade notas de cualquier tipo de prueba — exámenes, trabajos, oral, actitud — y calcula la media ponderada al instante</div>
 
-        <div class="tabs2">
-          <button class="t2 on" onclick="swT('ct-txt','ct-img',this)">Texto / Rúbrica</button>
-          <button class="t2" onclick="swT('ct-img','ct-txt',this)">Foto / PDF escaneado</button>
+        <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:flex-end">
+          <div class="fg" style="flex:2;min-width:140px;margin:0"><label>Nombre de la prueba</label><input id="reg-nombre" placeholder="Examen Tema 4, Trabajo oral..."></div>
+          <div class="fg" style="flex:1;min-width:80px;margin:0"><label>Peso (%)</label><input type="number" id="reg-peso" value="20" min="1" max="100"></div>
+          <button class="btn btn-primary" onclick="regAddPrueba()" style="flex-shrink:0">+ Añadir prueba</button>
         </div>
 
-        <div id="ct-txt">
-          <div class="g2">
-            <div class="fg"><label>Asignatura</label><select id="c-asig"><option>Lengua Castellana</option>
-                <option>Lengua y Literatura</option>
-                <option>Inglés</option>
-                <option>Francés</option>
-                <option>Alemán</option>
-                <option>Matemáticas</option>
-                <option>Matemáticas Aplicadas</option>
-                <option>Física y Química</option>
-                <option>Física</option>
-                <option>Química</option>
-                <option>Biología y Geología</option>
-                <option>Biología</option>
-                <option>Historia de España</option>
-                <option>Historia del Mundo Contemporáneo</option>
-                <option>Geografía e Historia</option>
-                <option>Filosofía</option>
-                <option>Economía</option>
-                <option>Tecnología</option>
-                <option>Informática</option>
-                <option>Educación Plástica y Visual</option>
-                <option>Música</option>
-                <option>Educación Física</option>
-                <option>Religión</option>
-                <option>Valores Éticos</option>
-                <option>Latín</option>
-                <option>Griego</option></select></div>
-            <div class="fg"><label>Alumno</label><input id="c-alu" placeholder="Nombre del alumno"></div>
-          </div>
-          <div class="fg"><label>Rúbrica y preguntas con puntuación máxima</label>
-            <textarea id="c-rub" rows="3" placeholder="P1 (2 pts): Define la oración compuesta&#10;P2 (3 pts): Análisis sintáctico&#10;P3 (5 pts): Redacción argumentativa de 150 palabras"></textarea></div>
-          <div class="fg"><label>Respuesta del alumno</label>
-            <textarea id="c-res" rows="5" placeholder="Copia aquí lo que ha escrito el alumno..."></textarea></div>
-          <button class="btn btn-primary" onclick="corregir()">Corregir con IA</button>
-        </div>
+        <div id="reg-pruebas"></div>
 
-        <div id="ct-img" style="display:none">
-          <div class="g2">
-            <div class="fg"><label>Asignatura</label><select id="c-asig2"><option>Lengua Castellana</option>
-                <option>Lengua y Literatura</option>
-                <option>Inglés</option>
-                <option>Francés</option>
-                <option>Alemán</option>
-                <option>Matemáticas</option>
-                <option>Matemáticas Aplicadas</option>
-                <option>Física y Química</option>
-                <option>Física</option>
-                <option>Química</option>
-                <option>Biología y Geología</option>
-                <option>Biología</option>
-                <option>Historia de España</option>
-                <option>Historia del Mundo Contemporáneo</option>
-                <option>Geografía e Historia</option>
-                <option>Filosofía</option>
-                <option>Economía</option>
-                <option>Tecnología</option>
-                <option>Informática</option>
-                <option>Educación Plástica y Visual</option>
-                <option>Música</option>
-                <option>Educación Física</option>
-                <option>Religión</option>
-                <option>Valores Éticos</option>
-                <option>Latín</option>
-                <option>Griego</option></select></div>
-            <div class="fg"><label>Alumno</label><input id="c-alu2" placeholder="Nombre del alumno"></div>
+        <div id="reg-tabla-wrap" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin:16px 0 10px;flex-wrap:wrap;gap:8px">
+            <div style="font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--primary-hi)">Tabla de notas</div>
+            <div class="btn-row">
+              <button class="btn btn-sm" onclick="regAddAlumno()">+ Alumno</button>
+              <button class="btn btn-sm btn-teal" onclick="regImprimir()">Imprimir</button>
+            </div>
           </div>
-          <div class="fzone" onclick="document.getElementById('f-ex').click()">
-            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Haz clic para subir foto o PDF del examen escaneado<br>
-            <span style="font-size:11px">JPG, PNG o PDF · máx. 10 MB</span>
+          <div style="overflow-x:auto">
+            <table id="reg-tabla" style="border-collapse:collapse;font-size:13px;width:100%;min-width:400px">
+              <thead id="reg-thead"></thead>
+              <tbody id="reg-tbody"></tbody>
+            </table>
           </div>
-          <input type="file" id="f-ex" accept="image/*,.pdf" style="display:none" onchange="onFile(this)">
-          <div id="fn" style="font-size:11px;color:var(--text-muted);margin:6px 0;display:none"></div>
-          <div class="fg"><label>Criterios adicionales (opcional)</label>
-            <textarea id="c-crit" rows="2" placeholder="Ej: valorar ortografía -0.1 por falta, distribución de puntos por apartados..."></textarea></div>
-          <button class="btn btn-primary" onclick="corregirImg()">Analizar y corregir</button>
-        </div>
-
-        <div class="spin-row" id="sp-c"><div class="spin"></div>Corrigiendo con IA — puede tardar unos segundos...</div>
-        <div class="rw" id="rw-c">
-          <div class="rh">
-            <span class="rl">Corrección generada</span>
-            <button class="btn btn-sm" onclick="cp('r-c')">Copiar</button>
-          </div>
-          <div class="rb" id="r-c"></div>
         </div>
       </div>
 
@@ -1488,8 +1419,8 @@ tr:hover td { background: var(--bg-hi); }
     <span>Clases</span>
   </button>
   <button class="bn-btn" id="bn-corrector" onclick="sw('corrector',1)">
-    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-    <span>Corrector</span>
+    <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
+    <span>Notas</span>
   </button>
   <button class="bn-btn" id="bn-tests" onclick="sw('tests',2)">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -1515,22 +1446,15 @@ tr:hover td { background: var(--bg-hi); }
 
 <script>
 // =====================================================
-var PAGES = ['Gestión de clases','Corrector de exámenes','Generador de tests','Rúbricas e informes','Matemáticas adaptativas','Comunicación con familias','Exámenes y autocorrección'];
+var PAGES = ['Gestión de clases','Registro de notas','Generador de tests','Rúbricas e informes','Matemáticas adaptativas','Comunicación con familias','Exámenes y autocorrección'];
 var PANELS = ['clases','corrector','tests','rubricas','mates','familias','examenes'];
 var cA = '1A', nivelMat = 'basico', famTipo = 'citacion', fileB64 = null;
 
 var D = {
-  '1A': [
-    {n:'Ana', a:'Martínez García', e:'ana@mail.com', e1:8, e2:7.5, e3:null},
-    {n:'Carlos', a:'López Ruiz', e:'carlos@mail.com', e1:5, e2:4.5, e3:null},
-    {n:'Sofía', a:'Pérez Jiménez', e:'sofia@mail.com', e1:9, e2:9.5, e3:null},
-    {n:'David', a:'García Moreno', e:'david@mail.com', e1:6, e2:6.5, e3:null},
-    {n:'Laura', a:'Sánchez Díaz', e:'laura@mail.com', e1:3, e2:4, e3:null},
-    {n:'Miguel', a:'Torres Fernández', e:'miguel@mail.com', e1:7, e2:7, e3:null}
-  ],
-  '1B': [{n:'Elena', a:'Romero Castro', e:'elena@mail.com', e1:8.5, e2:8, e3:null}],
-  '2A': [{n:'Lucía', a:'Navarro Gil', e:'lucia@mail.com', e1:7, e2:7.5, e3:null}],
-  '3A': [{n:'Marina', a:'Ortega Flores', e:'marina@mail.com', e1:9, e2:8.5, e3:null}]
+  '1A': [],
+  '1B': [],
+  '2A': [],
+  '3A': []
 };
 
 // =====================================================
@@ -3797,7 +3721,169 @@ function toggleSolBtn(btn) {
 
 
 // ═══════════════════════════════════════
-// MÓDULO EXÁMENES
+// REGISTRO DE NOTAS
+// ═══════════════════════════════════════
+var REG = { pruebas: [], alumnos: [] };
+
+function regAddPrueba() {
+  var nombre = document.getElementById('reg-nombre').value.trim();
+  var peso = parseInt(document.getElementById('reg-peso').value) || 20;
+  if (!nombre) { alert('Introduce el nombre de la prueba'); return; }
+  REG.pruebas.push({ nombre: nombre, peso: peso });
+  document.getElementById('reg-nombre').value = '';
+  document.getElementById('reg-peso').value = '20';
+  regRender();
+}
+
+function regDelPrueba(i) {
+  REG.pruebas.splice(i, 1);
+  REG.alumnos.forEach(function(a) { delete a.notas[i]; });
+  regRender();
+}
+
+function regAddAlumno() {
+  var n = prompt('Nombre del alumno:');
+  if (!n || !n.trim()) return;
+  REG.alumnos.push({ nombre: n.trim(), notas: {} });
+  regRender();
+}
+
+function regDelAlumno(i) {
+  REG.alumnos.splice(i, 1);
+  regRender();
+}
+
+function regSetNota(ai, pi, val) {
+  var n = parseFloat(val);
+  if (!isNaN(n)) REG.alumnos[ai].notas[pi] = Math.min(10, Math.max(0, n));
+  else delete REG.alumnos[ai].notas[pi];
+  regUpdateRow(ai);
+}
+
+function regMedia(alumno) {
+  var totalPeso = 0, totalPonderado = 0;
+  REG.pruebas.forEach(function(p, i) {
+    if (alumno.notas[i] !== undefined) {
+      totalPonderado += alumno.notas[i] * p.peso;
+      totalPeso += p.peso;
+    }
+  });
+  return totalPeso > 0 ? Math.round(totalPonderado / totalPeso * 10) / 10 : null;
+}
+
+function regPillColor(n) {
+  if (n === null) return 'var(--text-muted)';
+  if (n >= 7) return 'var(--success)';
+  if (n >= 5) return 'var(--warn)';
+  return 'var(--danger)';
+}
+
+function regUpdateRow(ai) {
+  var al = REG.alumnos[ai];
+  var m = regMedia(al);
+  var mediaCell = document.getElementById('reg-media-' + ai);
+  if (mediaCell) {
+    mediaCell.textContent = m !== null ? m : '—';
+    mediaCell.style.color = regPillColor(m);
+    mediaCell.style.fontWeight = '700';
+  }
+  // Update total peso
+  regUpdatePeso();
+}
+
+function regUpdatePeso() {
+  var total = REG.pruebas.reduce(function(s, p) { return s + p.peso; }, 0);
+  var el = document.getElementById('reg-peso-total');
+  if (el) {
+    el.textContent = total + '%';
+    el.style.color = total === 100 ? 'var(--success)' : total > 100 ? 'var(--danger)' : 'var(--warn)';
+  }
+}
+
+function regRender() {
+  // Pruebas badges
+  var pContainer = document.getElementById('reg-pruebas');
+  if (!REG.pruebas.length) {
+    pContainer.innerHTML = '<div style="font-size:.82rem;color:var(--text-muted);padding:8px 0">Añade pruebas para empezar. Ejemplo: Examen T1 (30%), Trabajo oral (20%), Actitud (10%)...</div>';
+    document.getElementById('reg-tabla-wrap').style.display = 'none';
+    return;
+  }
+  var total = REG.pruebas.reduce(function(s, p) { return s + p.peso; }, 0);
+  pContainer.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px">' +
+    REG.pruebas.map(function(p, i) {
+      return '<div style="display:flex;align-items:center;gap:5px;background:var(--primary-soft);border:1px solid var(--primary);border-radius:20px;padding:4px 10px 4px 12px;font-size:.8rem">' +
+        '<span style="color:var(--text);font-weight:500">' + p.nombre + '</span>' +
+        '<span style="color:var(--primary-hi);font-size:.72rem">·</span>' +
+        '<span style="color:var(--primary-hi);font-weight:700">' + p.peso + '%</span>' +
+        '<button onclick="regDelPrueba(' + i + ')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:14px;padding:0 0 0 4px;line-height:1">×</button>' +
+        '</div>';
+    }).join('') +
+    '</div>' +
+    '<div style="font-size:.75rem;font-weight:600">Total peso: <span id="reg-peso-total" style="color:' + (total===100?'var(--success)':total>100?'var(--danger)':'var(--warn)') + '">' + total + '%</span>' +
+    (total !== 100 ? '<span style="color:var(--text-muted);font-weight:400"> — debe sumar 100% para media exacta</span>' : ' ✓') + '</div>';
+
+  document.getElementById('reg-tabla-wrap').style.display = 'block';
+
+  // Thead
+  var thead = document.getElementById('reg-thead');
+  thead.innerHTML = '<tr>' +
+    '<th style="text-align:left;padding:8px 10px;font-size:.68rem;font-weight:700;color:var(--primary-hi);letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg-deep);min-width:120px">Alumno</th>' +
+    REG.pruebas.map(function(p) {
+      return '<th style="text-align:center;padding:8px 6px;font-size:.68rem;font-weight:700;color:var(--primary-hi);letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg-deep);white-space:nowrap">' +
+        p.nombre + '<br><span style="color:var(--teal-hi);font-weight:500">' + p.peso + '%</span></th>';
+    }).join('') +
+    '<th style="text-align:center;padding:8px 10px;font-size:.68rem;font-weight:700;color:var(--primary-hi);letter-spacing:.07em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg-deep)">Media</th>' +
+    '<th style="border-bottom:1px solid var(--border);background:var(--bg-deep);padding:8px 6px"></th>' +
+    '</tr>';
+
+  // Tbody
+  var tbody = document.getElementById('reg-tbody');
+  if (!REG.alumnos.length) {
+    tbody.innerHTML = '<tr><td colspan="' + (REG.pruebas.length + 3) + '" style="text-align:center;padding:24px;color:var(--text-muted);font-size:.88rem">Añade alumnos con el botón de arriba</td></tr>';
+    return;
+  }
+  tbody.innerHTML = REG.alumnos.map(function(al, ai) {
+    var m = regMedia(al);
+    return '<tr>' +
+      '<td style="padding:6px 10px;border-bottom:1px solid var(--border);font-weight:500;color:var(--text)">' + al.nombre + '</td>' +
+      REG.pruebas.map(function(p, pi) {
+        var val = al.notas[pi] !== undefined ? al.notas[pi] : '';
+        return '<td style="padding:4px 5px;border-bottom:1px solid var(--border);text-align:center">' +
+          '<input type="number" min="0" max="10" step="0.1" value="' + val + '" ' +
+          'style="width:52px;padding:4px 6px;border:1.5px solid var(--border);border-radius:var(--rxs);font-size:12px;background:var(--bg-deep);color:var(--text);font-family:inherit;outline:none;text-align:center;color-scheme:dark" ' +
+          'oninput="regSetNota(' + ai + ',' + pi + ',this.value)" ' +
+          'onfocus="this.style.borderColor=\'var(--primary)\'" ' +
+          'onblur="this.style.borderColor=\'var(--border)\'">' +
+          '</td>';
+      }).join('') +
+      '<td id="reg-media-' + ai + '" style="padding:6px 8px;border-bottom:1px solid var(--border);text-align:center;font-weight:700;color:' + regPillColor(m) + '">' + (m !== null ? m : '—') + '</td>' +
+      '<td style="padding:4px 6px;border-bottom:1px solid var(--border);text-align:center">' +
+      '<button onclick="regDelAlumno(' + ai + ')" style="background:none;border:1px solid rgba(248,113,113,.35);border-radius:var(--rxs);color:var(--danger);cursor:pointer;padding:3px 8px;font-size:11px;font-family:inherit">×</button>' +
+      '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function regImprimir() {
+  if (!REG.pruebas.length || !REG.alumnos.length) return;
+  var css = '<style>body{font-family:Arial,sans-serif;font-size:11pt;padding:12mm}table{border-collapse:collapse;width:100%}th{background:#f0f0f0;padding:7px 10px;font-size:9pt;border:1px solid #ccc;text-align:center}td{padding:6px 10px;border:1px solid #ccc;text-align:center}td:first-child{text-align:left;font-weight:500}.med{font-weight:700}.alta{color:#16a34a}.media{color:#d97706}.baja{color:#dc2626}</style>';
+  var h = '<h2 style="font-size:14pt;margin-bottom:12px">Registro de notas</h2><table><thead><tr><th>Alumno</th>' +
+    REG.pruebas.map(function(p){return '<th>'+p.nombre+'<br><small>'+p.peso+'%</small></th>'}).join('') +
+    '<th>Media</th></tr></thead><tbody>' +
+    REG.alumnos.map(function(al) {
+      var m = regMedia(al);
+      var cls = m===null?'':m>=7?'alta':m>=5?'media':'baja';
+      return '<tr><td>'+al.nombre+'</td>'+
+        REG.pruebas.map(function(p,pi){return '<td>'+(al.notas[pi]!==undefined?al.notas[pi]:'—')+'</td>'}).join('')+
+        '<td class="med '+cls+'">'+(m!==null?m:'—')+'</td></tr>';
+    }).join('') + '</tbody></table>';
+  var pw = window.open('','_blank');
+  pw.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8">'+css+'</head><body>'+h+'</body></html>');
+  pw.document.close(); pw.focus(); setTimeout(function(){pw.print()},400);
+}
+
+// Init render
+regRender();
 // ═══════════════════════════════════════
 var EXdb={examenes:[],correcciones:[]};
 try{var _exs=localStorage.getItem('dex3');if(_exs)EXdb=JSON.parse(_exs)}catch(e){}
@@ -4014,7 +4100,7 @@ function exImprimir(){
 var _sw0=sw;sw=function(p,i){_sw0(p,i);if(p==='examenes'){exRenderDash();exShowSub('lista')}};
 
 // Demo
-if(!EXdb.examenes.length){EXdb.examenes.push({id:'DEMO001',titulo:'Examen Tema 4 — Fracciones',clase:'3º ESO A',asig:'Matemáticas',fecha:new Date().toISOString().split('T')[0],instrucciones:'Rodea con un círculo la letra de la respuesta correcta.',alumnos:['Ana Martínez','Carlos López','Sofía Pérez','David García','Laura Sánchez','Miguel Torres'],preguntas:[{texto:'¿Cuánto es 1/2 + 1/3?',opciones:['2/5','5/6','1/6','3/5'],correcta:1,puntos:2},{texto:'¿Cuál es la fracción equivalente a 2/4?',opciones:['1/2','2/3','3/4','4/5'],correcta:0,puntos:2},{texto:'¿Cuánto es 3/4 × 2/3?',opciones:['6/12','1/2','5/7','9/8'],correcta:1,puntos:3},{texto:'¿Cuál es la fracción impropia de 2½?',opciones:['3/2','7/4','5/2','4/2'],correcta:2,puntos:3}]});exSave()}
+if(!EXdb.examenes.length){ /* sin demo */ }
 
 ['modal-ex-crear','modal-ex-alumnos'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('click',function(e){if(e.target===el)el.classList.remove('open')})});
 </script>
