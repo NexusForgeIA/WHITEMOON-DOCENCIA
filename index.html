@@ -3516,6 +3516,141 @@ geografia: {
 
 }; // fin BANCO
 
+// ── Francés y Alemán ──
+BANCO['frances'] = {
+  nombre: 'Francés',
+  temas: {
+    vocabulaire: {
+      nombre: 'Vocabulaire',
+      niveles: ['e1','e2','e3','e4','b1','b2'],
+      preguntas: [
+        {tipo:'mc', texto:'Comment dit-on "bonjour" en français?', opciones:['Au revoir','Bonjour','Merci','S\'il vous plaît'], correcta:1},
+        {tipo:'mc', texto:'Quel est le genre du mot "table"?', opciones:['Masculin','Féminin','Neutre','Variable'], correcta:1},
+        {tipo:'mc', texto:'"La maison" signifie en espagnol:', opciones:['La tienda','La casa','La calle','La ciudad'], correcta:1},
+        {tipo:'mc', texto:'Comment s\'appelle le repas du soir en français?', opciones:['Le déjeuner','Le petit-déjeuner','Le dîner','Le goûter'], correcta:2},
+        {tipo:'mc', texto:'"Le livre" signifie:', opciones:['La pluma','El cuaderno','El libro','La mesa'], correcta:2},
+        {tipo:'mc', texto:'Quelle est la traduction de "semaine"?', opciones:['Mes','Año','Semana','Día'], correcta:2},
+        {tipo:'mc', texto:'"Rouge" signifie:', opciones:['Azul','Verde','Rojo','Amarillo'], correcta:2},
+        {tipo:'mc', texto:'Comment dit-on "chien" en espagnol?', opciones:['Gato','Caballo','Perro','Pájaro'], correcta:2},
+        {tipo:'mc', texto:'Quel mot signifie "école"?', opciones:['Hospital','Tienda','Escuela','Biblioteca'], correcta:2},
+        {tipo:'mc', texto:'"Grand" est le contraire de:', opciones:['Vieux','Petit','Jeune','Rapide'], correcta:1},
+        {tipo:'mc', texto:'"Manger" signifie:', opciones:['Beber','Dormir','Comer','Correr'], correcta:2},
+        {tipo:'mc', texto:'Le mot "fenêtre" signifie:', opciones:['Puerta','Ventana','Pared','Techo'], correcta:1},
+        {tipo:'tf', texto:'"Le soleil" est masculin en français.', correcta:true},
+        {tipo:'tf', texto:'"La mer" signifie "la tierra" en español.', correcta:false},
+        {tipo:'mc', texto:'"Beau" est le féminin de:', opciones:['Belle','Belle (correct)','Bel','Tous les deux b et c'], correcta:1},
+        {tipo:'mc', texto:'Comment dit-on "j\'ai faim" en espagnol?', opciones:['Tengo sed','Tengo frío','Tengo hambre','Tengo sueño'], correcta:2},
+        {tipo:'mc', texto:'"Vite" signifie:', opciones:['Lentamente','Rápidamente','Fácilmente','Difícilmente'], correcta:1},
+        {tipo:'mc', texto:'Quel est le contraire de "chaud"?', opciones:['Sec','Humide','Froid','Venteux'], correcta:2},
+      ]
+    },
+    grammaire: {
+      nombre: 'Grammaire',
+      niveles: ['e1','e2','e3','e4','b1','b2'],
+      preguntas: [
+        {tipo:'mc', texto:'Choisissez la forme correcte: "Je ___ étudiant."', opciones:['suis','es','est','êtes'], correcta:0},
+        {tipo:'mc', texto:'Conjuguez "avoir" à la 3e personne du singulier:', opciones:['ai','as','a','avons'], correcta:2},
+        {tipo:'mc', texto:'Quelle est la négation correcte? "Je ___ parle pas."', opciones:['ne','ni','n\'','pas'], correcta:0},
+        {tipo:'tf', texto:'En français, les adjectifs s\'accordent en genre et en nombre.', correcta:true},
+        {tipo:'mc', texto:'"Nous parlons" est conjugué au:', opciones:['Passé composé','Présent','Imparfait','Futur'], correcta:1},
+        {tipo:'mc', texto:'Quel est le passé composé de "parler"?', opciones:['j\'ai parlé','j\'ai parler','je parle','je parlais'], correcta:0},
+        {tipo:'mc', texto:'L\'article défini masculin singulier est:', opciones:['La','Les','Le','Un'], correcta:2},
+        {tipo:'mc', texto:'"Elle est ___ professeur." Quel article utiliser?', opciones:['un','une','le','—(pas d\'article)'], correcta:3},
+        {tipo:'tf', texto:'Le pluriel de "animal" est "animaux".', correcta:true},
+        {tipo:'mc', texto:'Comment forme-t-on le féminin de "bon"?', opciones:['bons','bonne','bons','bonnes'], correcta:1},
+        {tipo:'mc', texto:'"Tu vas ___ cinéma." Quelle préposition?', opciones:['à la','du','au','de'], correcta:2},
+        {tipo:'mc', texto:'"Ils ont mangé" est au:', opciones:['Présent','Imparfait','Passé composé','Futur'], correcta:2},
+        {tipo:'mc', texto:'Quelle est la forme correcte du futur? "Demain, je ___."', opciones:['mange','mangeais','mangerai','ai mangé'], correcta:2},
+        {tipo:'tf', texto:'"Beau" devient "bel" devant une voyelle: "un bel homme".', correcta:true},
+        {tipo:'mc', texto:'Le pronom COD de "Je vois Marie" est:', opciones:['lui','la','le','y'], correcta:1},
+        {tipo:'mc', texto:'"Plus grand que" est un comparatif de:', opciones:['Infériorité','Égalité','Supériorité','Superlatif'], correcta:2},
+      ]
+    },
+    culture: {
+      nombre: 'Culture et civilisation',
+      niveles: ['e2','e3','e4','b1','b2'],
+      preguntas: [
+        {tipo:'mc', texto:'Quelle est la capitale de la France?', opciones:['Lyon','Marseille','Paris','Bordeaux'], correcta:2},
+        {tipo:'mc', texto:'Quel fleuve traverse Paris?', opciones:['Le Rhône','La Loire','La Seine','La Garonne'], correcta:2},
+        {tipo:'tf', texto:'La Tour Eiffel a été construite en 1889.', correcta:true},
+        {tipo:'mc', texto:'Quelle est la langue officielle de la Belgique?', opciones:['Seulement le français','Le français et le néerlandais','Seulement le néerlandais','L\'allemand'], correcta:1},
+        {tipo:'mc', texto:'Le "baccalauréat" est:', opciones:['Un diplôme universitaire','Un examen de fin d\'études secondaires','Un concours sportif','Un festival culturel'], correcta:1},
+        {tipo:'tf', texto:'La francophonie désigne l\'ensemble des pays et personnes qui parlent français.', correcta:true},
+        {tipo:'mc', texto:'Victor Hugo est l\'auteur de:', opciones:['Madame Bovary','Les Misérables','L\'Étranger','Le Petit Prince'], correcta:1},
+        {tipo:'mc', texto:'Le 14 juillet est la fête nationale française, qui commémore:', opciones:['La fin de la guerre','La prise de la Bastille','L\'élection du président','La naissance de Napoléon'], correcta:1},
+      ]
+    }
+  }
+};
+
+BANCO['aleman'] = {
+  nombre: 'Alemán',
+  temas: {
+    wortschatz: {
+      nombre: 'Wortschatz (Vocabulario)',
+      niveles: ['e1','e2','e3','e4','b1','b2'],
+      preguntas: [
+        {tipo:'mc', texto:'Was bedeutet "Hallo" auf Spanisch?', opciones:['Adiós','Gracias','Hola','Por favor'], correcta:2},
+        {tipo:'mc', texto:'Wie heißt "Haus" auf Spanisch?', opciones:['Calle','Casa','Ciudad','Tienda'], correcta:1},
+        {tipo:'mc', texto:'"Schule" bedeutet auf Spanisch:', opciones:['Hospital','Biblioteca','Escuela','Mercado'], correcta:2},
+        {tipo:'mc', texto:'Was bedeutet "Wasser"?', opciones:['Fuego','Tierra','Agua','Aire'], correcta:2},
+        {tipo:'mc', texto:'"Rot" ist die Farbe:', opciones:['Azul','Verde','Rojo','Amarillo'], correcta:2},
+        {tipo:'mc', texto:'Wie heißt "Hund" auf Spanisch?', opciones:['Gato','Pájaro','Perro','Caballo'], correcta:2},
+        {tipo:'mc', texto:'"Groß" ist das Gegenteil von:', opciones:['Schnell','Neu','Klein','Alt'], correcta:2},
+        {tipo:'mc', texto:'"Essen" bedeutet auf Spanisch:', opciones:['Beber','Dormir','Correr','Comer'], correcta:3},
+        {tipo:'mc', texto:'Was bedeutet "Familie"?', opciones:['Amigo','Familia','Trabajo','Escuela'], correcta:1},
+        {tipo:'mc', texto:'"Das Buch" bedeutet:', opciones:['El cuaderno','La mesa','El libro','La silla'], correcta:2},
+        {tipo:'tf', texto:'"Gut" bedeutet "bueno/bien" auf Spanisch.', correcta:true},
+        {tipo:'tf', texto:'"Nein" bedeutet "sí" auf Spanisch.', correcta:false},
+        {tipo:'mc', texto:'"Danke" bedeutet:', opciones:['Por favor','De nada','Gracias','Perdón'], correcta:2},
+        {tipo:'mc', texto:'Wie heißt "Freund" auf Spanisch?', opciones:['Enemigo','Familia','Amigo','Vecino'], correcta:2},
+        {tipo:'mc', texto:'"Morgen" kann bedeuten:', opciones:['Solo noche','Mañana (tiempo) o mañana (día siguiente)','Solo tarde','Solo mediodía'], correcta:1},
+        {tipo:'mc', texto:'"Kalt" ist das Gegenteil von:', opciones:['Nass','Warm','Groß','Schnell'], correcta:1},
+        {tipo:'mc', texto:'Was bedeutet "Arbeit"?', opciones:['Vacaciones','Descanso','Trabajo','Deporte'], correcta:2},
+        {tipo:'mc', texto:'"Schön" bedeutet:', opciones:['Feo','Difícil','Hermoso/bonito','Pequeño'], correcta:2},
+      ]
+    },
+    grammatik: {
+      nombre: 'Grammatik',
+      niveles: ['e1','e2','e3','e4','b1','b2'],
+      preguntas: [
+        {tipo:'mc', texto:'Welcher Artikel ist für "Haus" (Neutrum) korrekt?', opciones:['Der','Die','Das','Ein'], correcta:2},
+        {tipo:'mc', texto:'"Ich ___ Student." Welches Verb?', opciones:['bin','bist','ist','sind'], correcta:0},
+        {tipo:'mc', texto:'Der Plural von "Kind" ist:', opciones:['Kinds','Kinden','Kinder','Kinds'], correcta:2},
+        {tipo:'tf', texto:'Im Deutschen haben alle Substantive einen Artikel (der, die, das).', correcta:true},
+        {tipo:'mc', texto:'"Haben" in der 3. Person Singular ist:', opciones:['habe','hast','hat','haben'], correcta:2},
+        {tipo:'mc', texto:'Was ist die verneinte Form von "Ich habe ein Auto"?', opciones:['Ich habe kein Auto','Ich nicht habe Auto','Ich habe nicht ein Auto','Ich kein Auto habe'], correcta:0},
+        {tipo:'mc', texto:'Der Akkusativ des maskulinen Artikels "der" ist:', opciones:['der','dem','den','des'], correcta:2},
+        {tipo:'tf', texto:'Im Deutschen steht das Verb immer an zweiter Stelle im Hauptsatz.', correcta:true},
+        {tipo:'mc', texto:'Das Perfekt von "gehen" ist:', opciones:['ich habe gegangen','ich bin gegangen','ich bin gegangt','ich habe gegangt'], correcta:1},
+        {tipo:'mc', texto:'Welche Präposition fordert den Dativ? "Ich wohne ___ Berlin."', opciones:['für','gegen','in','um'], correcta:2},
+        {tipo:'mc', texto:'"Schnell" ist ein:', opciones:['Substantiv','Verb','Adjektiv/Adverb','Artikel'], correcta:2},
+        {tipo:'mc', texto:'Der Komparativ von "gut" ist:', opciones:['guter','mehr gut','besser','am besten'], correcta:2},
+        {tipo:'tf', texto:'Trennbare Verben trennen sich im Präsens: "Ich stehe um 7 auf."', correcta:true},
+        {tipo:'mc', texto:'"Weil" ist eine:', opciones:['Koordinierende Konjunktion','Unterordnende Konjunktion','Präposition','Partikel'], correcta:1},
+        {tipo:'mc', texto:'Das Modalverb für Fähigkeit/Können ist:', opciones:['müssen','dürfen','können','sollen'], correcta:2},
+        {tipo:'mc', texto:'Im Nebensatz mit "weil" steht das Verb:', opciones:['Am Anfang','An zweiter Stelle','Am Ende','An dritter Stelle'], correcta:2},
+      ]
+    },
+    landeskunde: {
+      nombre: 'Landeskunde (Cultura)',
+      niveles: ['e2','e3','e4','b1','b2'],
+      preguntas: [
+        {tipo:'mc', texto:'Was ist die Hauptstadt von Deutschland?', opciones:['Múnich','Hamburgo','Berlín','Frankfurt'], correcta:2},
+        {tipo:'mc', texto:'Welcher Fluss fließt durch Köln?', opciones:['Der Rhein','Die Donau','Die Elbe','Der Main'], correcta:0},
+        {tipo:'tf', texto:'Österreich ist ein deutschsprachiges Land.', correcta:true},
+        {tipo:'mc', texto:'Das Oktoberfest findet statt in:', opciones:['Berlín','Hamburgo','Múnich','Viena'], correcta:2},
+        {tipo:'mc', texto:'Wie viele Bundesländer hat Deutschland?', opciones:['10','14','16','18'], correcta:2},
+        {tipo:'tf', texto:'Die Schweiz hat vier Amtssprachen, darunter Deutsch.', correcta:true},
+        {tipo:'mc', texto:'Wer schrieb "Faust"?', opciones:['Schiller','Goethe','Kafka','Mann'], correcta:1},
+        {tipo:'mc', texto:'Der Euro ist die Währung von:', opciones:['Nur Deutschland','Nur Österreich','Deutschland, Österreich und anderen EU-Ländern','Nur der Schweiz'], correcta:2},
+      ]
+    }
+  }
+};
+
+// Registrar en ASIG_MAP (se añaden después de la declaración del mapa)
+
 // ─────────────────────────────────────────
 // MOTOR DE GENERACIÓN SIN API
 // ─────────────────────────────────────────
@@ -3524,6 +3659,8 @@ var ASIG_MAP = {
   'Lengua Castellana': 'lengua',
   'Lengua y Literatura': 'lengua',
   'Inglés': 'ingles',
+  'Francés': 'frances',
+  'Alemán': 'aleman',
   'Historia de España': 'historia',
   'Historia del Mundo Contemporáneo': 'historia',
   'Geografía e Historia': 'historia',
