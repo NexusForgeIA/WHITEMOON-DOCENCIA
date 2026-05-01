@@ -822,11 +822,11 @@ tr:hover td { background: var(--bg-hi); }
         <div class="tb-brand">Doce<span>ncIA</span></div>
         <div class="tb-page" id="tb-page">Gestión de clases</div>
       </div>
-      <div class="tb-user">
-        <div class="tb-name" id="tb-name">Prof. García</div>
-        <div class="tb-school" id="tb-school">IES WhiteMoon</div>
-        <div class="tb-av" id="tb-av">MG</div>
-      </div>
+        <div class="tb-user" onclick="abrirPerfil()" style="cursor:pointer" title="Editar perfil">
+          <div class="tb-name" id="tb-name">Prof. García</div>
+          <div class="tb-school" id="tb-school">IES WhiteMoon</div>
+          <div class="tb-av" id="tb-av">MG</div>
+        </div>
     </header>
 
     <main class="main">
@@ -1190,6 +1190,22 @@ tr:hover td { background: var(--bg-hi); }
     <div class="modal-foot">
       <button class="btn" onclick="document.getElementById('m-alu').classList.remove('open')">Cancelar</button>
       <button class="btn btn-primary" onclick="addAlu()">Añadir alumno</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PERFIL DOCENTE -->
+<div class="modal-overlay" id="modal-perfil">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title">Perfil del docente</div>
+    <div style="padding:16px 22px">
+      <div class="fg"><label>Nombre</label><input id="pf-nombre" placeholder="Prof. García"></div>
+      <div class="fg"><label>Centro educativo</label><input id="pf-centro" placeholder="IES WhiteMoon"></div>
+      <div class="fg"><label>Asignatura principal</label><input id="pf-asig" placeholder="Matemáticas"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="cerrarPerfil()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarPerfil()">Guardar</button>
     </div>
   </div>
 </div>
@@ -1751,9 +1767,50 @@ function quickFam(i) {
 // =====================================================
 render();
 
-
 // ═══════════════════════════════════════
-// MOTOR MATEMÁTICAS ADAPTATIVAS (sin API)
+// PERFIL DOCENTE
+// ═══════════════════════════════════════
+var PERFIL = {nombre: 'Prof. García', centro: 'IES WhiteMoon', asig: ''};
+try { var _p = localStorage.getItem('docencia_perfil'); if(_p) PERFIL = JSON.parse(_p); } catch(e) {}
+
+function aplicarPerfil() {
+  var n = PERFIL.nombre || 'Docente';
+  var c = PERFIL.centro || 'IES WhiteMoon';
+  document.getElementById('tb-name').textContent = n;
+  document.getElementById('tb-school').textContent = c;
+  var partes = n.replace(/^(Prof\.|Dr\.|Dra\.|D\.|Da\.)\s*/i,'').trim().split(' ');
+  var ini = partes.map(function(p){return p[0]||''}).join('').toUpperCase().slice(0,2);
+  document.getElementById('tb-av').textContent = ini || 'P';
+}
+
+function abrirPerfil() {
+  document.getElementById('pf-nombre').value = PERFIL.nombre || '';
+  document.getElementById('pf-centro').value = PERFIL.centro || '';
+  document.getElementById('pf-asig').value = PERFIL.asig || '';
+  document.getElementById('modal-perfil').classList.add('open');
+  setTimeout(function(){ document.getElementById('pf-nombre').focus(); }, 100);
+}
+
+function cerrarPerfil() {
+  document.getElementById('modal-perfil').classList.remove('open');
+}
+
+function guardarPerfil() {
+  var n = document.getElementById('pf-nombre').value.trim();
+  var c = document.getElementById('pf-centro').value.trim();
+  var a = document.getElementById('pf-asig').value.trim();
+  if (!n) { alert('Introduce tu nombre'); return; }
+  PERFIL = { nombre: n, centro: c || 'IES WhiteMoon', asig: a };
+  try { localStorage.setItem('docencia_perfil', JSON.stringify(PERFIL)); } catch(e) {}
+  aplicarPerfil();
+  cerrarPerfil();
+}
+
+document.getElementById('modal-perfil').addEventListener('click', function(e) {
+  if (e.target === this) cerrarPerfil();
+});
+
+aplicarPerfil();
 // ═══════════════════════════════════════
 function rnd(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
 function rndDec(a, b, dec) { return Math.round((Math.random() * (b - a) + a) * Math.pow(10, dec)) / Math.pow(10, dec); }
