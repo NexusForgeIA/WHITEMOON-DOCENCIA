@@ -848,7 +848,7 @@ tr:hover td { background: var(--bg-hi); }
             <button class="tag" onclick="selC(this,'3A')">3º A</button>
           </div>
           <div class="btn-row">
-            <button class="btn btn-sm" onclick="document.getElementById('m-alu').classList.add('open')">+ Alumno</button>
+            <button class="btn btn-sm" onclick="abrirModalAlumno()">+ Alumno</button>
             <button class="btn btn-sm btn-primary" onclick="genInfGrupo()">Generar informes</button>
           </div>
         </div>
@@ -1469,10 +1469,10 @@ tr:hover td { background: var(--bg-hi); }
   <div class="modal">
     <div class="modal-title">Añadir alumno</div>
     <div class="g2">
-      <div class="fg"><label>Nombre</label><input id="nn" placeholder="María"></div>
-      <div class="fg"><label>Apellidos</label><input id="na" placeholder="García López"></div>
-      <div class="fg"><label>Email familia</label><input type="email" id="ne" placeholder="familia@email.com"></div>
-      <div class="fg"><label>Nota 1ª evaluación</label><input type="number" id="nn1" min="1" max="10" step="0.5" placeholder="—"></div>
+      <div class="fg"><label>Nombre</label><input id="nn" placeholder="María" onkeydown="if(event.key==='Enter')document.getElementById('na').focus()"></div>
+      <div class="fg"><label>Apellidos</label><input id="na" placeholder="García López" onkeydown="if(event.key==='Enter')document.getElementById('ne').focus()"></div>
+      <div class="fg"><label>Email familia</label><input type="email" id="ne" placeholder="familia@email.com" onkeydown="if(event.key==='Enter')document.getElementById('nn1').focus()"></div>
+      <div class="fg"><label>Nota 1ª evaluación</label><input type="number" id="nn1" min="1" max="10" step="0.5" placeholder="—" onkeydown="if(event.key==='Enter')addAlu()"></div>
     </div>
     <div class="modal-foot">
       <button class="btn" onclick="document.getElementById('m-alu').classList.remove('open')">Cancelar</button>
@@ -1618,7 +1618,7 @@ function render() {
       '<td><input class="ni" type="number" min="1" max="10" step="0.5" value="' + (al.e3 !== null && al.e3 !== undefined ? al.e3 : '') + '" onchange="setN(' + i + ',3,this.value)"></td>' +
       '<td>' + pill(m) + '</td>' +
       '<td>' + est + '</td>' +
-      '<td><div class="btn-row"><button class="btn btn-sm" onclick="quickInf(' + i + ')">Informe</button><button class="btn btn-sm" onclick="quickFam(' + i + ')">Email</button></div></td>' +
+      '<td><div class="btn-row"><button class="btn btn-sm" onclick="quickInf(' + i + ')">Informe</button><button class="btn btn-sm" onclick="quickFam(' + i + ')">Email</button><button class="btn btn-sm" style="color:var(--danger);border-color:rgba(248,113,113,.35)" onclick="borrarAlu(' + i + ')">×</button></div></td>' +
       '</tr>';
   }).join('');
   var ms = list.map(med).filter(function(x) { return x !== null; });
@@ -1654,6 +1654,19 @@ function addAlu() {
   document.getElementById('m-alu').classList.remove('open');
   ['nn','na','ne','nn1'].forEach(function(id) { document.getElementById(id).value = ''; });
   render();
+}
+
+function borrarAlu(i) {
+  var al = D[cA][i];
+  if (!confirm('¿Eliminar a ' + al.n + ' ' + al.a + ' de la clase?')) return;
+  D[cA].splice(i, 1);
+  render();
+}
+
+function abrirModalAlumno() {
+  ['nn','na','ne','nn1'].forEach(function(id) { document.getElementById(id).value = ''; });
+  document.getElementById('m-alu').classList.add('open');
+  setTimeout(function(){ document.getElementById('nn').focus(); }, 100);
 }
 
 function quickInf(i) {
