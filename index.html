@@ -788,6 +788,10 @@ tr:hover td { background: var(--bg-hi); }
     <button class="sb-btn" id="btn-familias" onclick="sw('familias',5)" title="Comunicación familias">
       <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
     </button>
+    <div class="sb-divider"></div>
+    <button class="sb-btn" id="btn-examenes" onclick="sw('examenes',6)" title="Exámenes y autocorrección">
+      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    </button>
   </nav>
 
   <!-- CONTENT -->
@@ -1297,11 +1301,146 @@ tr:hover td { background: var(--bg-hi); }
         </div>
       </div>
 
+      <!-- EXÁMENES -->
+      <div class="panel" id="p-examenes">
+        <div class="pt">Exámenes con <span>autocorrección</span></div>
+        <div class="pd">Crea exámenes, imprímelos, introduce las respuestas de la clase y obtén notas al instante</div>
+
+        <!-- Sub-vista: lista -->
+        <div class="ex-sub active" id="exv-lista">
+          <div class="stats" id="ex-stats">
+            <div class="stat"><div class="stat-n" id="ex-st-ex">0</div><div class="stat-l">Exámenes</div></div>
+            <div class="stat"><div class="stat-n" id="ex-st-cor">0</div><div class="stat-l">Correcciones</div></div>
+            <div class="stat"><div class="stat-n" id="ex-st-med">—</div><div class="stat-l">Media global</div></div>
+            <div class="stat"><div class="stat-n" id="ex-st-al">0</div><div class="stat-l">Alumnos únicos</div></div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+            <div style="font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)">Mis exámenes</div>
+            <button class="btn btn-primary btn-sm" onclick="exAbrirCrear()">+ Nuevo examen</button>
+          </div>
+          <div id="ex-lista"><div style="text-align:center;padding:30px;color:var(--text-muted)">No hay exámenes. Crea el primero.</div></div>
+        </div>
+
+        <!-- Sub-vista: detalle -->
+        <div class="ex-sub" id="exv-det">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+            <button class="btn btn-sm" onclick="exShowSub('lista')">← Volver</button>
+            <div id="ex-det-titulo" style="font-family:'Fraunces',serif;font-size:1.1rem;font-weight:600;flex:1"></div>
+            <button class="btn btn-sm btn-teal" onclick="exImprimir()">Imprimir examen</button>
+            <button class="btn btn-sm btn-primary" onclick="exAbrirCorregir()">Corregir clase →</button>
+          </div>
+          <div id="ex-det-content"></div>
+        </div>
+
+        <!-- Sub-vista: corrección -->
+        <div class="ex-sub" id="exv-corr">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+            <button class="btn btn-sm" onclick="exShowSub('det')">← Volver</button>
+            <div id="ex-corr-titulo" style="font-family:'Fraunces',serif;font-size:1rem;font-weight:600;flex:1"></div>
+            <button class="btn btn-sm btn-primary" onclick="exGuardarCorr()">Guardar y ver resultados</button>
+          </div>
+          <div id="ex-corr-content"></div>
+        </div>
+
+        <!-- Sub-vista: resultados -->
+        <div class="ex-sub" id="exv-res">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+            <button class="btn btn-sm" onclick="exShowSub('det')">← Volver</button>
+            <div id="ex-res-titulo" style="font-family:'Fraunces',serif;font-size:1rem;font-weight:600;flex:1"></div>
+            <button class="btn btn-sm" onclick="window.print()">Imprimir resultados</button>
+          </div>
+          <div id="ex-res-content"></div>
+        </div>
+      </div>
+
     </main>
   </div>
 </div>
 
-<!-- MODAL NUEVO ALUMNO -->
+<!-- ═══════════════════════════════
+     PANEL EXÁMENES — HTML
+═══════════════════════════════ -->
+<style>
+.ex-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:15px 18px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;transition:border-color .15s}
+.ex-card:hover{border-color:var(--border-hi)}
+.ex-title{font-weight:600;color:var(--text);font-size:.93rem;margin-bottom:3px}
+.ex-meta{font-size:.73rem;color:var(--text-muted);display:flex;gap:10px;flex-wrap:wrap}
+.qb-ex{background:var(--bg-deep);border:1.5px solid var(--border);border-radius:var(--rsm,8px);padding:13px 15px;margin-bottom:10px;position:relative}
+.qb-num{position:absolute;top:10px;right:10px;font-size:.68rem;font-weight:700;color:var(--text-muted);background:var(--bg-card);border:1px solid var(--border);border-radius:4px;padding:2px 7px}
+.ol-ex{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.ol-btn{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--border);background:transparent;font-size:12px;font-weight:700;cursor:pointer;color:var(--text-muted);font-family:inherit;transition:all .15s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.ol-btn.on{background:var(--teal-soft);border-color:var(--teal);color:var(--teal-hi)}
+.oi-ex{flex:1;padding:7px 10px;border:1.5px solid var(--border);border-radius:4px;font-size:12px;background:var(--bg-card);color:var(--text);font-family:inherit;outline:none}
+.oi-ex:focus{border-color:var(--primary)}
+.ct-ex{overflow-x:auto;margin-bottom:14px}
+.ctb-ex{border-collapse:collapse;font-size:12px;width:100%;min-width:380px}
+.ctb-ex th{padding:8px 7px;text-align:center;font-size:.62rem;font-weight:700;color:var(--primary-hi);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--border);background:var(--bg-deep);white-space:nowrap}
+.ctb-ex th.thn{text-align:left;min-width:110px}
+.ctb-ex td{padding:5px 5px;border-bottom:1px solid var(--border);text-align:center;vertical-align:middle}
+.ctb-ex td.tdn{text-align:left;font-weight:500;color:var(--text);font-size:13px;padding-left:8px}
+.ctb-ex tr:hover td{background:var(--bg-hi)}.ctb-ex tr:last-child td{border-bottom:none}
+.os-ex{display:flex;gap:3px;justify-content:center}
+.ob-ex{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);background:transparent;font-size:10px;font-weight:700;cursor:pointer;color:var(--text-muted);font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ob-ex:hover{border-color:var(--primary);color:var(--primary-hi)}
+.ob-ex.sel-ex{background:var(--primary-soft);border-color:var(--primary);color:var(--primary-hi)}
+.ob-ex.ok-ex{background:rgba(74,222,128,.2);border-color:var(--success);color:var(--success)}
+.ob-ex.ko-ex{background:rgba(248,113,113,.12);border-color:var(--danger);color:var(--danger);opacity:.7}
+.nc-ex{font-weight:700;font-size:.88rem}
+.nc-ex.alta{color:var(--success)}.nc-ex.media{color:var(--warn)}.nc-ex.baja{color:var(--danger)}.nc-ex.v{color:var(--text-muted)}
+.br-ex{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.bl-ex{width:110px;font-size:.72rem;color:var(--text-soft);text-align:right;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bt-ex{flex:1;height:8px;background:var(--bg-deep);border-radius:4px;overflow:hidden}
+.bf-ex{height:100%;border-radius:4px;transition:width .5s ease}
+.bv-ex{width:36px;font-size:.72rem;font-weight:600;text-align:right;flex-shrink:0}
+.ex-sub{display:none}.ex-sub.active{display:block;animation:fadeUp .22s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.rh-ex{text-align:center;padding:22px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:14px}
+.rn-ex{font-family:'Fraunces',serif;font-size:3.2rem;font-weight:700;line-height:1}
+.rn-ex.alta{color:var(--success)}.rn-ex.media{background:linear-gradient(135deg,var(--primary-hi),var(--teal));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}.rn-ex.baja{color:var(--danger)}
+</style>
+
+<!-- MODALS EXÁMENES -->
+<div class="modal-overlay" id="modal-ex-crear">
+  <div class="modal" style="max-width:700px">
+    <div style="padding:17px 22px 0;font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600" id="modal-ex-tit">Nuevo examen</div>
+    <div style="padding:15px 22px">
+      <div class="g2">
+        <div class="fg"><label>Título del examen</label><input id="ex-tit" placeholder="Examen Tema 3"></div>
+        <div class="fg"><label>Clase / Grupo</label><input id="ex-clase" placeholder="3º ESO A"></div>
+        <div class="fg"><label>Asignatura</label>
+          <select id="ex-asig"><option>Lengua Castellana</option><option>Lengua y Literatura</option><option>Inglés</option><option>Francés</option><option>Alemán</option><option selected>Matemáticas</option><option>Matemáticas Aplicadas</option><option>Física y Química</option><option>Física</option><option>Química</option><option>Biología y Geología</option><option>Historia de España</option><option>Historia del Mundo Contemporáneo</option><option>Geografía e Historia</option><option>Filosofía</option><option>Economía</option><option>Tecnología</option><option>Informática</option><option>Educación Física</option><option>Religión</option><option>Valores Éticos</option></select>
+        </div>
+        <div class="fg"><label>Fecha</label><input type="date" id="ex-fecha"></div>
+      </div>
+      <div class="fg"><label>Instrucciones (opcional)</label><textarea id="ex-inst" placeholder="Rodea con un círculo la letra de la respuesta correcta..."></textarea></div>
+      <div style="height:1px;background:var(--border);margin:13px 0"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--primary-hi)">Preguntas</div>
+        <button class="btn btn-primary btn-sm" onclick="exAddQ()">+ Añadir pregunta</button>
+      </div>
+      <div id="ex-qbuilder"><div style="text-align:center;padding:16px;color:var(--text-muted);font-size:.88rem">Añade preguntas.</div></div>
+    </div>
+    <div style="padding:12px 22px 16px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="cerrarOverlay('modal-ex-crear')">Cancelar</button>
+      <button class="btn btn-primary" onclick="exGuardar()">Guardar examen</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-ex-alumnos">
+  <div class="modal" style="max-width:400px">
+    <div style="padding:17px 22px 0;font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600">Gestionar alumnos</div>
+    <div style="padding:15px 22px">
+      <div class="fg"><label>Nombre del alumno</label><input id="ex-al-n" placeholder="Nombre y apellido" onkeydown="if(event.key==='Enter')exAddAl()"></div>
+      <button class="btn btn-primary" onclick="exAddAl()" style="width:100%;justify-content:center;margin-bottom:12px">Añadir alumno</button>
+      <div style="height:1px;background:var(--border);margin-bottom:12px"></div>
+      <div id="ex-al-lista" style="max-height:250px;overflow-y:auto"></div>
+    </div>
+    <div style="padding:12px 22px 16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end">
+      <button class="btn btn-primary" onclick="cerrarOverlay('modal-ex-alumnos')">Listo</button>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="m-alu">
   <div class="modal">
     <div class="modal-title">Añadir alumno</div>
@@ -1344,12 +1483,16 @@ tr:hover td { background: var(--bg-hi); }
     <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
     <span>Familias</span>
   </button>
+  <button class="bn-btn" id="bn-examenes" onclick="sw('examenes',6)">
+    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span>Exámenes</span>
+  </button>
 </nav>
 
 <script>
 // =====================================================
-var PAGES = ['Gestión de clases','Corrector de exámenes','Generador de tests','Rúbricas e informes','Matemáticas adaptativas','Comunicación con familias'];
-var PANELS = ['clases','corrector','tests','rubricas','mates','familias'];
+var PAGES = ['Gestión de clases','Corrector de exámenes','Generador de tests','Rúbricas e informes','Matemáticas adaptativas','Comunicación con familias','Exámenes y autocorrección'];
+var PANELS = ['clases','corrector','tests','rubricas','mates','familias','examenes'];
 var cA = '1A', nivelMat = 'basico', famTipo = 'citacion', fileB64 = null;
 
 var D = {
@@ -1507,19 +1650,56 @@ function quickFam(i) {
 // =====================================================
 // CLAUDE API
 // =====================================================
+var APIKEY = '';
+
+function getKey() {
+  if (APIKEY) return APIKEY;
+  APIKEY = localStorage.getItem('docencia_key') || '';
+  if (!APIKEY) {
+    APIKEY = prompt('Introduce tu API Key de Anthropic (empieza por sk-ant-):\n\nPuedes obtenerla en console.anthropic.com');
+    if (APIKEY && APIKEY.startsWith('sk-')) {
+      localStorage.setItem('docencia_key', APIKEY);
+    } else {
+      APIKEY = '';
+      alert('API Key no válida. Introduce una clave que empiece por sk-ant-');
+    }
+  }
+  return APIKEY;
+}
+
 async function claude(prompt, sys) {
-  var r = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      system: sys || 'Eres un asistente especializado para docentes españoles. Responde siempre en español. Sigue la normativa educativa española LOMLOE. Sin saludos ni texto de relleno.',
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
-  var d = await r.json();
-  return d.content && d.content[0] ? d.content[0].text : 'Error al conectar con la IA.';
+  var key = getKey();
+  if (!key) return 'Error: API Key no configurada. Recarga la página e introduce tu clave.';
+  try {
+    var r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 1500,
+        system: sys || 'Eres un asistente especializado para docentes españoles. Responde siempre en español. Sigue la normativa educativa española LOMLOE. Sin saludos ni texto de relleno.',
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    if (!r.ok) {
+      var err = await r.json().catch(function() { return {}; });
+      if (r.status === 401) {
+        localStorage.removeItem('docencia_key');
+        APIKEY = '';
+        return 'Error 401: API Key incorrecta o caducada. Recarga la página para introducir una nueva.';
+      }
+      return 'Error ' + r.status + ': ' + (err.error && err.error.message ? err.error.message : 'Error desconocido');
+    }
+    var d = await r.json();
+    return d.content && d.content[0] ? d.content[0].text : 'Error: respuesta vacía de la IA.';
+  } catch(e) {
+    return 'Error de conexión: ' + e.message + '. Verifica tu conexión a internet.';
+  }
 }
 
 function showSp(id) { document.getElementById(id).classList.add('on'); }
@@ -1563,6 +1743,8 @@ async function corregir() {
 
 async function corregirImg() {
   if (!fileB64) { alert('Sube primero la foto o PDF del examen.'); return; }
+  var key = getKey();
+  if (!key) return;
   var asig = document.getElementById('c-asig2').value;
   var alu = document.getElementById('c-alu2').value;
   var crit = document.getElementById('c-crit').value;
@@ -1570,10 +1752,15 @@ async function corregirImg() {
   try {
     var r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
+        model: 'claude-haiku-4-5',
+        max_tokens: 1500,
         system: 'Eres un corrector de exámenes para docentes españoles. Responde en español.',
         messages: [{
           role: 'user',
@@ -1749,6 +1936,228 @@ function quickFam(i) {
 // INIT
 // =====================================================
 render();
+
+// ═══════════════════════════════════════
+// MÓDULO EXÁMENES
+// ═══════════════════════════════════════
+var EXdb={examenes:[],correcciones:[]};
+try{var _exs=localStorage.getItem('dex3');if(_exs)EXdb=JSON.parse(_exs)}catch(e){}
+function exSave(){try{localStorage.setItem('dex3',JSON.stringify(EXdb))}catch(e){}}
+var exIdx=-1,exQsB=[],exEditIdx=-1,exCorrA={};
+
+function cerrarOverlay(id){document.getElementById(id).classList.remove('open')}
+function exShowSub(sub){document.querySelectorAll('.ex-sub').forEach(function(s){s.classList.remove('active')});document.getElementById('exv-'+sub).classList.add('active')}
+
+function exRenderDash(){
+  var nc=EXdb.correcciones.length;
+  var al=new Set(EXdb.correcciones.map(function(c){return c.alumno})).size;
+  var ns=EXdb.correcciones.filter(function(c){return c.nota!==null}).map(function(c){return c.nota});
+  var med=ns.length?Math.round(ns.reduce(function(s,x){return s+x},0)/ns.length*10)/10:null;
+  document.getElementById('ex-st-ex').textContent=EXdb.examenes.length;
+  document.getElementById('ex-st-cor').textContent=nc;
+  document.getElementById('ex-st-med').textContent=med!==null?med:'—';
+  document.getElementById('ex-st-al').textContent=al;
+  var cont=document.getElementById('ex-lista');
+  if(!EXdb.examenes.length){cont.innerHTML='<div style="text-align:center;padding:30px;color:var(--text-muted)">No hay exámenes. Crea el primero.</div>';return}
+  cont.innerHTML=EXdb.examenes.map(function(ex,i){
+    var cs=EXdb.correcciones.filter(function(c){return c.exId===ex.id});
+    var ms=cs.filter(function(c){return c.nota!==null}).map(function(c){return c.nota});
+    var mx=ms.length?Math.round(ms.reduce(function(s,x){return s+x},0)/ms.length*10)/10:null;
+    var pts=ex.preguntas.reduce(function(s,q){return s+(q.puntos||1)},0);
+    return '<div class="ex-card" onclick="exAbrirDet('+i+')">'+
+      '<div style="flex:1;min-width:0"><div class="ex-title">'+ex.titulo+'</div>'+
+      '<div class="ex-meta">'+(ex.clase?'<span>'+ex.clase+'</span>':'')+(ex.asig?'<span>'+ex.asig+'</span>':'')+
+      '<span>'+ex.preguntas.length+' preguntas · '+pts.toFixed(1)+' pts</span>'+
+      (ex.fecha?'<span>'+new Date(ex.fecha+'T12:00').toLocaleDateString('es-ES')+'</span>':'')+
+      '<span>'+cs.length+' correcciones</span>'+(mx!==null?'<span>Media: <strong>'+mx+'</strong></span>':'')+
+      '</div></div>'+
+      '<div class="btn-row" onclick="event.stopPropagation()">'+
+        '<button class="btn btn-sm" onclick="exAbrirEditar('+i+')">Editar</button>'+
+        '<button class="btn btn-sm" style="color:var(--danger);border-color:rgba(248,113,113,.35)" onclick="exBorrar('+i+')">Borrar</button>'+
+      '</div></div>';
+  }).join('');
+}
+
+function exBorrar(i){if(!confirm('¿Borrar examen y correcciones?'))return;var id=EXdb.examenes[i].id;EXdb.examenes.splice(i,1);EXdb.correcciones=EXdb.correcciones.filter(function(c){return c.exId!==id});exSave();exRenderDash()}
+
+function exAbrirCrear(){
+  exEditIdx=-1;exQsB=[];
+  ['ex-tit','ex-clase','ex-inst'].forEach(function(id){document.getElementById(id).value=''});
+  document.getElementById('ex-asig').value='Matemáticas';
+  document.getElementById('ex-fecha').value=new Date().toISOString().split('T')[0];
+  document.getElementById('modal-ex-tit').textContent='Nuevo examen';
+  exRenderQB();document.getElementById('modal-ex-crear').classList.add('open');
+}
+
+function exAbrirEditar(i){
+  exEditIdx=i;var ex=EXdb.examenes[i];exQsB=JSON.parse(JSON.stringify(ex.preguntas));
+  document.getElementById('ex-tit').value=ex.titulo;document.getElementById('ex-clase').value=ex.clase||'';
+  document.getElementById('ex-asig').value=ex.asig||'Matemáticas';document.getElementById('ex-fecha').value=ex.fecha||'';
+  document.getElementById('ex-inst').value=ex.instrucciones||'';
+  document.getElementById('modal-ex-tit').textContent='Editar examen';
+  exRenderQB();document.getElementById('modal-ex-crear').classList.add('open');
+}
+
+function exAddQ(){exQsB.push({texto:'',opciones:['','','',''],correcta:0,puntos:1});exRenderQB();setTimeout(function(){var b=document.getElementById('ex-qbuilder');b.scrollTop=b.scrollHeight},50)}
+
+function exRenderQB(){
+  var c=document.getElementById('ex-qbuilder');
+  if(!exQsB.length){c.innerHTML='<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:.88rem">Añade preguntas.</div>';return}
+  c.innerHTML=exQsB.map(function(q,qi){
+    return '<div class="qb-ex"><span class="qb-num">P'+(qi+1)+'</span>'+
+      '<div class="fg" style="margin-bottom:10px"><label>Enunciado</label>'+
+      '<textarea style="min-height:46px;padding:8px 10px;border:1.5px solid var(--border);border-radius:4px;font-size:13px;background:var(--bg-card);color:var(--text);font-family:inherit;outline:none;resize:vertical;width:100%" oninput="exQsB['+qi+'].texto=this.value" onfocus="this.style.borderColor=\'var(--primary)\'" onblur="this.style.borderColor=\'var(--border)\'">'+q.texto+'</textarea></div>'+
+      '<div style="font-size:.7rem;color:var(--text-muted);margin-bottom:6px">Pulsa la letra para marcar la correcta</div>'+
+      ['A','B','C','D'].map(function(l,oi){return '<div class="ol-ex"><button class="ol-btn '+(q.correcta===oi?'on':'')+'" onclick="exSetC('+qi+','+oi+')">'+l+'</button><input class="oi-ex" type="text" value="'+q.opciones[oi].replace(/"/g,'&quot;')+'" placeholder="Opción '+l+'" oninput="exQsB['+qi+'].opciones['+oi+']=this.value" onfocus="this.style.borderColor=\'var(--primary)\'" onblur="this.style.borderColor=\'var(--border)\'"></div>'}).join('')+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px"><div style="font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:6px">Puntos: <input type="number" value="'+q.puntos+'" min="0.5" max="10" step="0.5" style="width:52px;padding:4px 8px;border:1.5px solid var(--border);border-radius:4px;font-size:12px;background:var(--bg-deep);color:var(--text);font-family:inherit;outline:none;text-align:center" oninput="exQsB['+qi+'].puntos=parseFloat(this.value)||1"></div><button class="btn btn-sm" style="color:var(--danger);border-color:rgba(248,113,113,.35)" onclick="exDelQ('+qi+')">Eliminar</button></div></div>';
+  }).join('');
+}
+
+function exSetC(qi,oi){exQsB[qi].correcta=oi;exRenderQB()}
+function exDelQ(qi){exQsB.splice(qi,1);exRenderQB()}
+
+function exGuardar(){
+  var tit=document.getElementById('ex-tit').value.trim();
+  if(!tit){alert('Introduce un título');return}
+  if(!exQsB.length){alert('Añade al menos una pregunta');return}
+  if(exQsB.some(function(q){return !q.texto.trim()||q.opciones.some(function(o){return !o.trim()})})){alert('Completa todas las preguntas y opciones');return}
+  var ex={id:exEditIdx>=0?EXdb.examenes[exEditIdx].id:'EX'+Date.now(),titulo:tit,
+    clase:document.getElementById('ex-clase').value.trim(),asig:document.getElementById('ex-asig').value,
+    fecha:document.getElementById('ex-fecha').value,instrucciones:document.getElementById('ex-inst').value.trim(),
+    preguntas:JSON.parse(JSON.stringify(exQsB)),alumnos:exEditIdx>=0?EXdb.examenes[exEditIdx].alumnos||[]:[],
+  };
+  if(exEditIdx>=0)EXdb.examenes[exEditIdx]=ex;else EXdb.examenes.unshift(ex);
+  exSave();cerrarOverlay('modal-ex-crear');exRenderDash();
+}
+
+function exAbrirDet(i){exIdx=i;exRenderDet();exShowSub('det')}
+
+function exRenderDet(){
+  var ex=EXdb.examenes[exIdx];var cs=EXdb.correcciones.filter(function(c){return c.exId===ex.id});
+  var pts=ex.preguntas.reduce(function(s,q){return s+(q.puntos||1)},0);
+  document.getElementById('ex-det-titulo').textContent=ex.titulo+(ex.clase?' · '+ex.clase:'');
+  var cl='<div style="font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--primary-hi);margin-bottom:12px;display:flex;align-items:center;gap:8px"><span style="width:14px;height:2px;background:linear-gradient(90deg,var(--primary),var(--teal));border-radius:2px;display:inline-block"></span>';
+  var h='<div class="g2"><div class="card">'+cl+'Datos</div>'+
+    '<div style="font-size:13px;color:var(--text-soft);line-height:2.2"><div>Preguntas: <strong style="color:var(--text)">'+ex.preguntas.length+'</strong></div><div>Puntuación: <strong style="color:var(--text)">'+pts.toFixed(1)+' pts</strong></div><div>Correcciones: <strong style="color:var(--text)">'+cs.length+'</strong></div><div>Alumnos: <strong style="color:var(--text)">'+(ex.alumnos||[]).length+'</strong></div></div>'+
+    '<div class="btn-row" style="margin-top:10px"><button class="btn btn-sm" onclick="exAbrirAlumnos()">Gestionar alumnos</button></div></div>';
+  h+='<div class="card">'+cl+'Preguntas y respuestas correctas</div>';
+  ex.preguntas.forEach(function(q,qi){
+    h+='<div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)"><div style="font-size:.78rem;color:var(--text-muted);margin-bottom:3px">P'+(qi+1)+' · '+(q.puntos||1)+' pt'+(q.puntos!==1?'s':'')+'</div><div style="font-size:.88rem;color:var(--text);margin-bottom:5px">'+q.texto+'</div>'+
+      '<div style="display:flex;gap:5px;flex-wrap:wrap">'+q.opciones.map(function(op,oi){var ok=oi===q.correcta;return '<span style="padding:3px 10px;border-radius:20px;font-size:.73rem;border:1.5px solid '+(ok?'var(--teal)':'var(--border)')+';background:'+(ok?'var(--teal-soft)':'transparent')+';color:'+(ok?'var(--teal-hi)':'var(--text-muted)')+';font-weight:'+(ok?700:400)+'">'+String.fromCharCode(65+oi)+') '+op+(ok?' ✓':'')+'</span>'}).join('')+'</div></div>';
+  });
+  h+='</div></div>';
+  if(cs.length)h+=exRenderRes(ex,cs);
+  else h+='<div style="text-align:center;padding:28px;color:var(--text-muted);background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r)">Sin correcciones todavía. Pulsa <strong>Corregir clase</strong>.</div>';
+  document.getElementById('ex-det-content').innerHTML=h;
+}
+
+function exAbrirAlumnos(){document.getElementById('ex-al-n').value='';exRenderAlLista();document.getElementById('modal-ex-alumnos').classList.add('open')}
+function exRenderAlLista(){var ex=EXdb.examenes[exIdx];var al=ex.alumnos||[];var c=document.getElementById('ex-al-lista');if(!al.length){c.innerHTML='<div style="font-size:13px;color:var(--text-muted);text-align:center;padding:10px">Sin alumnos.</div>';return}c.innerHTML=al.map(function(a,i){return '<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px">'+a+'</span><button class="btn btn-sm" style="color:var(--danger);border-color:rgba(248,113,113,.35)" onclick="exDelAl('+i+')">×</button></div>'}).join('')}
+function exAddAl(){var n=document.getElementById('ex-al-n').value.trim();if(!n)return;if(!EXdb.examenes[exIdx].alumnos)EXdb.examenes[exIdx].alumnos=[];if(EXdb.examenes[exIdx].alumnos.indexOf(n)>=0)return;EXdb.examenes[exIdx].alumnos.push(n);exSave();document.getElementById('ex-al-n').value='';exRenderAlLista()}
+function exDelAl(i){EXdb.examenes[exIdx].alumnos.splice(i,1);exSave();exRenderAlLista()}
+
+function exAbrirCorregir(){
+  var ex=EXdb.examenes[exIdx];
+  if(!ex.alumnos||!ex.alumnos.length){alert('Añade alumnos primero');exAbrirAlumnos();return}
+  exCorrA={};
+  var prev=EXdb.correcciones.filter(function(c){return c.exId===ex.id});
+  ex.alumnos.forEach(function(a){var p=prev.find(function(c){return c.alumno===a});exCorrA[a]=p?JSON.parse(JSON.stringify(p.respuestas)):{}});
+  document.getElementById('ex-corr-titulo').textContent='Corrección: '+ex.titulo;
+  exRenderCorrT();exShowSub('corr');
+}
+
+function exRenderCorrT(){
+  var ex=EXdb.examenes[exIdx];var np=ex.preguntas.length;
+  var h='<div class="card" style="overflow:visible"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px"><div style="font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--primary-hi)">Respuestas de la clase</div><div style="font-size:.72rem;color:var(--text-muted)">Pulsa la letra marcada · <strong style="color:var(--teal-hi)">Verde = correcta</strong> · <strong style="color:var(--danger)">Roja = incorrecta</strong></div></div>'+
+    '<div class="ct-ex"><table class="ctb-ex"><thead><tr><th class="thn">Alumno</th>';
+  for(var pi=0;pi<np;pi++)h+='<th>P'+(pi+1)+'<br><span style="font-size:.58rem;color:var(--teal-hi);font-weight:500">'+String.fromCharCode(65+ex.preguntas[pi].correcta)+'✓</span></th>';
+  h+='<th>Nota</th><th>Corr.</th></tr></thead><tbody>';
+  ex.alumnos.forEach(function(alu){
+    var rs=exCorrA[alu]||{};var ptsTot=ex.preguntas.reduce(function(s,q){return s+(q.puntos||1)},0);
+    var ptsObt=ex.preguntas.reduce(function(s,q,pi){return s+(rs[pi]===q.correcta?q.puntos||1:0)},0);
+    var resp=Object.keys(rs).length;var nota=resp>0?Math.round(ptsObt/ptsTot*10*100)/100:null;
+    var nc=nota===null?'v':nota>=7?'alta':nota>=5?'media':'baja';
+    var ac=ex.preguntas.filter(function(q,pi){return rs[pi]===q.correcta}).length;
+    h+='<tr><td class="tdn">'+alu+'</td>';
+    for(var pi2=0;pi2<np;pi2++){var r=rs[pi2];var ok=ex.preguntas[pi2].correcta;
+      h+='<td><div class="os-ex">';
+      for(var oi=0;oi<4;oi++){var cls='ob-ex';if(r===oi)cls+=(r===ok)?' ok-ex':' ko-ex';h+='<button class="'+cls+'" onclick="exSetR(\''+alu.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\','+pi2+','+oi+')">'+String.fromCharCode(65+oi)+'</button>'}
+      h+='</div></td>';
+    }
+    h+='<td class="nc-ex '+nc+'">'+(nota!==null?nota:'—')+'</td><td style="font-size:.78rem;color:var(--text-muted)">'+(resp>0?ac+'/'+np:'—')+'</td></tr>';
+  });
+  h+='</tbody></table></div></div>';
+  document.getElementById('ex-corr-content').innerHTML=h;
+}
+
+function exSetR(alu,pi,oi){if(!exCorrA[alu])exCorrA[alu]={};if(exCorrA[alu][pi]===oi)delete exCorrA[alu][pi];else exCorrA[alu][pi]=oi;exRenderCorrT()}
+
+function exGuardarCorr(){
+  var ex=EXdb.examenes[exIdx];var ptsTot=ex.preguntas.reduce(function(s,q){return s+(q.puntos||1)},0);
+  var sin=ex.alumnos.filter(function(a){return !Object.keys(exCorrA[a]||{}).length});
+  if(sin.length&&!confirm(sin.length+' alumno(s) sin respuestas. ¿Guardar igualmente?'))return;
+  EXdb.correcciones=EXdb.correcciones.filter(function(c){return c.exId!==ex.id});
+  ex.alumnos.forEach(function(alu){
+    var rs=exCorrA[alu]||{};var ptsObt=ex.preguntas.reduce(function(s,q,pi){return s+(rs[pi]===q.correcta?q.puntos||1:0)},0);
+    var resp=Object.keys(rs).length;
+    EXdb.correcciones.push({exId:ex.id,alumno:alu,respuestas:JSON.parse(JSON.stringify(rs)),nota:resp>0?Math.round(ptsObt/ptsTot*10*100)/100:null,aciertos:ex.preguntas.filter(function(q,pi){return rs[pi]===q.correcta}).length,fecha:new Date().toISOString()});
+  });
+  exSave();document.getElementById('ex-res-titulo').textContent='Resultados: '+ex.titulo;
+  document.getElementById('ex-res-content').innerHTML=exRenderRes(ex,EXdb.correcciones.filter(function(c){return c.exId===ex.id}));
+  exShowSub('res');
+}
+
+function exRenderRes(ex,cs){
+  if(!cs.length)return'';
+  var ns=cs.filter(function(c){return c.nota!==null}).map(function(c){return c.nota}).sort(function(a,b){return a-b});
+  var med=ns.length?Math.round(ns.reduce(function(s,x){return s+x},0)/ns.length*10)/10:null;
+  var apr=ns.filter(function(n){return n>=5}).length;
+  var cl='<div style="font-size:.7rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--primary-hi);margin-bottom:10px">';
+  var h='<div class="rh-ex"><div style="font-size:.82rem;color:var(--text-muted);margin-bottom:6px">'+ex.titulo+(ex.clase?' · '+ex.clase:'')+'</div>'+
+    '<div class="rn-ex '+(med>=7?'media':med>=5?'media':'baja')+'">'+(med||'—')+'</div>'+
+    '<div style="font-size:.78rem;color:var(--text-muted);margin-top:5px">Media · '+apr+'/'+ns.length+' aprobados ('+Math.round(apr/(ns.length||1)*100)+'%)</div></div>';
+  h+='<div class="g3" style="margin-bottom:14px"><div class="stat"><div class="stat-n">'+(med||'—')+'</div><div class="stat-l">Media</div></div><div class="stat"><div class="stat-n">'+Math.round(apr/(ns.length||1)*100)+'%</div><div class="stat-l">Aprobados</div></div>'+(ns.length?'<div class="stat"><div class="stat-n">'+ns[0]+'–'+ns[ns.length-1]+'</div><div class="stat-l">Rango</div></div>':'')+'</div>';
+  h+='<div class="card">'+cl+'Rendimiento por pregunta</div>';
+  ex.preguntas.forEach(function(q,qi){
+    var rsp=cs.filter(function(c){return c.respuestas[qi]!==undefined});var ok=cs.filter(function(c){return c.respuestas[qi]===q.correcta});
+    var pct=rsp.length?Math.round(ok.length/rsp.length*100):0;
+    var col=pct>=70?'linear-gradient(90deg,var(--success),var(--teal))':pct>=40?'linear-gradient(90deg,var(--warn),#d4a24a)':'linear-gradient(90deg,var(--danger),var(--warn))';
+    h+='<div class="br-ex"><div class="bl-ex" title="'+q.texto+'">P'+(qi+1)+': '+q.texto.substring(0,16)+(q.texto.length>16?'…':'')+'</div><div class="bt-ex"><div class="bf-ex" style="width:'+pct+'%;background:'+col+'"></div></div><div class="bv-ex" style="color:'+(pct>=70?'var(--success)':pct>=40?'var(--warn)':'var(--danger)')+'">'+pct+'%</div></div>';
+  });
+  h+='</div><div class="card">'+cl+'Notas individuales</div><div class="ct-ex"><table class="ctb-ex"><thead><tr><th class="thn">Alumno</th>';
+  ex.preguntas.forEach(function(q,qi){h+='<th>P'+(qi+1)+'</th>'});
+  h+='<th>Aciertos</th><th>Nota</th></tr></thead><tbody>';
+  cs.forEach(function(c){
+    var nc=c.nota===null?'v':c.nota>=7?'alta':c.nota>=5?'media':'baja';
+    h+='<tr><td class="tdn">'+c.alumno+'</td>';
+    ex.preguntas.forEach(function(q,qi){var r=c.respuestas[qi];var ok2=r===q.correcta;var rsp=r!==undefined;h+='<td><span style="font-size:.82rem;font-weight:700;color:'+(rsp?(ok2?'var(--success)':'var(--danger)'):'var(--text-muted)')+'">'+(rsp?(ok2?'✓':'✗'):'—')+'</span></td>'});
+    h+='<td style="font-size:.78rem;color:var(--text-muted)">'+c.aciertos+'/'+ex.preguntas.length+'</td><td class="nc-ex '+nc+'">'+(c.nota!==null?c.nota:'—')+'</td></tr>';
+  });
+  h+='</tbody></table></div></div>';
+  var fr=[{l:'Suspenso',mn:0,mx:4.9,c:'var(--danger)'},{l:'Aprobado',mn:5,mx:5.9,c:'var(--warn)'},{l:'Bien',mn:6,mx:6.9,c:'#a78bfa'},{l:'Notable',mn:7,mx:8.9,c:'var(--teal-hi)'},{l:'Sobresaliente',mn:9,mx:10,c:'var(--success)'}];
+  h+='<div class="card">'+cl+'Distribución</div>';
+  fr.forEach(function(f){var n=ns.filter(function(x){return x>=f.mn&&x<=f.mx}).length;var pct=ns.length?Math.round(n/ns.length*100):0;h+='<div class="br-ex"><div class="bl-ex">'+f.l+'</div><div class="bt-ex"><div class="bf-ex" style="width:'+pct+'%;background:'+f.c+'"></div></div><div class="bv-ex">'+n+' al.</div></div>'});
+  h+='</div>';return h;
+}
+
+function exImprimir(){
+  var ex=EXdb.examenes[exIdx];var pts=ex.preguntas.reduce(function(s,q){return s+(q.puntos||1)},0);
+  var fd=ex.fecha?new Date(ex.fecha+'T12:00').toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'}):'';
+  var css='<style>body{font-family:Arial,sans-serif;font-size:11pt;color:#1a1a1a;margin:0;padding:12mm 15mm}.hdr{border-bottom:2px solid #222;padding-bottom:8px;margin-bottom:14px}.htop{display:flex;justify-content:space-between;margin-bottom:5px}.htit{font-size:14pt;font-weight:700;text-align:center;margin:6px 0 4px}.hmeta{display:flex;gap:14px;font-size:9pt;color:#666;justify-content:center;margin-bottom:7px}.harow{display:flex;gap:20px;font-size:10pt;border-top:1px solid #ccc;padding-top:7px}.haf{display:flex;align-items:flex-end;gap:5px;flex:1}.haf label{font-weight:700;white-space:nowrap}.line{flex:1;border-bottom:1px solid #777}.inst{font-size:9pt;color:#444;background:#f9f9f9;border:1px solid #ddd;padding:7px 11px;margin-bottom:12px}.pq{margin-bottom:12px;page-break-inside:avoid}.pqn{font-size:.68rem;font-weight:700;color:#666;margin-bottom:3px}.pqt{font-size:11pt;font-weight:500;margin-bottom:5px;line-height:1.5}.opts{display:flex;flex-wrap:wrap;gap:7px}.opt{border:1px solid #888;border-radius:18px;padding:3px 12px;font-size:10pt;display:inline-flex;align-items:center;gap:5px}.oc{width:13px;height:13px;border-radius:50%;border:1.5px solid #888;display:inline-block}.pts{font-size:9pt;color:#666;text-align:right;margin-top:3px}.foot{text-align:center;font-size:8pt;color:#aaa;margin-top:16px;border-top:1px solid #eee;padding-top:5px}</style>';
+  var h='<div class="hdr"><div class="htop"><span style="font-weight:700">DocencIA</span><span style="font-size:10pt;color:#555">'+(ex.asig||'')+(ex.clase?' · '+ex.clase:'')+(fd?'<br>'+fd:'')+'</span></div><div class="htit">'+ex.titulo+'</div><div class="hmeta"><span>'+ex.preguntas.length+' preguntas</span><span>'+pts.toFixed(1)+' puntos</span></div><div class="harow"><div class="haf"><label>Nombre:</label><span class="line"></span></div><div class="haf"><label>Grupo:</label><span class="line" style="max-width:70px"></span></div><div class="haf"><label>Nota:</label><span class="line" style="max-width:50px"></span></div></div></div>';
+  if(ex.instrucciones)h+='<div class="inst">'+ex.instrucciones+'</div>';
+  ex.preguntas.forEach(function(q,qi){h+='<div class="pq"><div class="pqn">Pregunta '+(qi+1)+'</div><div class="pqt">'+q.texto+'</div><div class="opts">'+q.opciones.map(function(op,oi){return '<div class="opt"><span class="oc"></span><strong>'+String.fromCharCode(65+oi)+')</strong> '+op+'</div>'}).join('')+'</div><div class="pts">'+(q.puntos||1)+' punto'+(q.puntos!==1?'s':'')+'</div></div>'});
+  h+='<div class="foot">Generado con DocencIA · WhiteMoon Agencia IA · whitemoon.es</div>';
+  var pw=window.open('','_blank');pw.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>'+ex.titulo+'</title>'+css+'</head><body>'+h+'</body></html>');pw.document.close();pw.focus();setTimeout(function(){pw.print()},500);
+}
+
+// Hook sw para inicializar exámenes al entrar
+var _sw0=sw;sw=function(p,i){_sw0(p,i);if(p==='examenes'){exRenderDash();exShowSub('lista')}};
+
+// Demo
+if(!EXdb.examenes.length){EXdb.examenes.push({id:'DEMO001',titulo:'Examen Tema 4 — Fracciones',clase:'3º ESO A',asig:'Matemáticas',fecha:new Date().toISOString().split('T')[0],instrucciones:'Rodea con un círculo la letra de la respuesta correcta.',alumnos:['Ana Martínez','Carlos López','Sofía Pérez','David García','Laura Sánchez','Miguel Torres'],preguntas:[{texto:'¿Cuánto es 1/2 + 1/3?',opciones:['2/5','5/6','1/6','3/5'],correcta:1,puntos:2},{texto:'¿Cuál es la fracción equivalente a 2/4?',opciones:['1/2','2/3','3/4','4/5'],correcta:0,puntos:2},{texto:'¿Cuánto es 3/4 × 2/3?',opciones:['6/12','1/2','5/7','9/8'],correcta:1,puntos:3},{texto:'¿Cuál es la fracción impropia de 2½?',opciones:['3/2','7/4','5/2','4/2'],correcta:2,puntos:3}]});exSave()}
+
+['modal-ex-crear','modal-ex-alumnos'].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener('click',function(e){if(e.target===el)el.classList.remove('open')})});
 </script>
 </body>
 </html>
