@@ -1393,56 +1393,38 @@ function quickFam(i) {
 // =====================================================
 // CLAUDE API
 // =====================================================
-var APIKEY = '';
+// La IA se llama SIEMPRE a través de la Edge Function `docencia-ia`, que
+// guarda la ANTHROPIC_API_KEY server-side. El navegador nunca ve ninguna clave.
+//
+// Antes esta demo pedía al visitante SU propia API key por prompt(), la
+// guardaba en localStorage y llamaba a la API de Anthropic directamente desde
+// el navegador con el flag de acceso directo. Eso exponía la clave del
+// visitante en el cliente. Ver PR fix/docencia-sin-key-cliente.
+var IA_ENDPOINT = 'https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/docencia-ia';
 
-function getKey() {
-  if (APIKEY) return APIKEY;
-  APIKEY = localStorage.getItem('docencia_key') || '';
-  if (!APIKEY) {
-    APIKEY = prompt('Introduce tu API Key de Anthropic (empieza por sk-ant-):\n\nPuedes obtenerla en console.anthropic.com');
-    if (APIKEY && APIKEY.startsWith('sk-')) {
-      localStorage.setItem('docencia_key', APIKEY);
-    } else {
-      APIKEY = '';
-      alert('API Key no válida. Introduce una clave que empiece por sk-ant-');
-    }
-  }
-  return APIKEY;
-}
+// Purga las claves que la versión anterior dejó guardadas en el navegador de
+// quien ya usó la demo. Sin esto, la clave del visitante seguiría en su
+// localStorage indefinidamente.
+try { localStorage.removeItem('docencia_key'); } catch(e) {}
 
-async function claude(prompt, sys) {
-  var key = getKey();
-  if (!key) return 'Error: API Key no configurada. Recarga la página e introduce tu clave.';
+// Envía `messages` (texto o bloques con imagen) a la Edge Function.
+async function iaRequest(messages, sys) {
   try {
-    var r = await fetch('https://api.anthropic.com/v1/messages', {
+    var r = await fetch(IA_ENDPOINT, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5',
-        max_tokens: 1500,
-        system: sys || 'Eres un asistente especializado para docentes españoles. Responde siempre en español. Sigue la normativa educativa española LOMLOE. Sin saludos ni texto de relleno.',
-        messages: [{ role: 'user', content: prompt }]
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: messages, system: sys, max_tokens: 1500 })
     });
-    if (!r.ok) {
-      var err = await r.json().catch(function() { return {}; });
-      if (r.status === 401) {
-        localStorage.removeItem('docencia_key');
-        APIKEY = '';
-        return 'Error 401: API Key incorrecta o caducada. Recarga la página para introducir una nueva.';
-      }
-      return 'Error ' + r.status + ': ' + (err.error && err.error.message ? err.error.message : 'Error desconocido');
-    }
-    var d = await r.json();
-    return d.content && d.content[0] ? d.content[0].text : 'Error: respuesta vacía de la IA.';
+    var d = await r.json().catch(function() { return {}; });
+    if (d.error) return 'Error: ' + d.error;
+    return d.text || 'Error: respuesta vacía de la IA.';
   } catch(e) {
     return 'Error de conexión: ' + e.message + '. Verifica tu conexión a internet.';
   }
+}
+
+async function claude(prompt, sys) {
+  return iaRequest([{ role: 'user', content: prompt }], sys);
 }
 
 function showSp(id) { document.getElementById(id).classList.add('on'); }
@@ -1502,41 +1484,22 @@ async function corregir() {
 
 async function corregirImg() {
   if (!fileB64) { alert('Sube primero la foto o PDF del examen.'); return; }
-  var key = getKey();
-  if (!key) return;
   var asig = document.getElementById('c-asig2').value;
   var alu = document.getElementById('c-alu2').value;
   var crit = document.getElementById('c-crit').value;
   showSp('sp-c'); hideR('rw-c');
-  try {
-    var r = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5',
-        max_tokens: 1500,
-        system: 'Eres un corrector de exámenes para docentes españoles. Responde en español.',
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: fileB64 } },
-            { type: 'text', text: 'Corrige este examen de ' + asig + (alu ? ' del alumno ' + alu : '') + '. ' + (crit ? 'Criterios: ' + crit + '. ' : '') + 'Devuelve: 1) NOTA FINAL/10  2) Corrección por pregunta  3) Feedback constructivo  4) Texto para el boletín' }
-          ]
-        }]
-      })
-    });
-    var d = await r.json();
-    hideSp('sp-c');
-    showR('rw-c', 'r-c', d.content && d.content[0] ? d.content[0].text : 'Error al procesar la imagen.');
-  } catch(e) {
-    hideSp('sp-c');
-    showR('rw-c', 'r-c', 'Error: ' + e.message);
-  }
+  var t = await iaRequest(
+    [{
+      role: 'user',
+      content: [
+        { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: fileB64 } },
+        { type: 'text', text: 'Corrige este examen de ' + asig + (alu ? ' del alumno ' + alu : '') + '. ' + (crit ? 'Criterios: ' + crit + '. ' : '') + 'Devuelve: 1) NOTA FINAL/10  2) Corrección por pregunta  3) Feedback constructivo  4) Texto para el boletín' }
+      ]
+    }],
+    'Eres un corrector de exámenes para docentes españoles. Responde en español.'
+  );
+  hideSp('sp-c');
+  showR('rw-c', 'r-c', t);
 }
 
 // =====================================================
